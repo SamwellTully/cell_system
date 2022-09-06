@@ -1,0 +1,77 @@
+{
+    "mappingName": "骨折到脑出血疾病",
+    "sourceFile": "骨折",
+    "targetFile": "脑出血疾病",
+    "info": [
+        {
+            "id": "1",
+            "sourceField": "保存方式",
+            "targetField": "保存方式"
+        },
+        {
+            "id": "2",
+            "sourceField": "疾病名称",
+            "targetField": "疾病名称"
+        },
+        {
+            "id": "3",
+            "sourceField": "民族",
+            "targetField": "民族"
+        },
+        {
+            "id": "4",
+            "sourceField": "库存编码",
+            "targetField": "库存编码"
+        },
+        {
+            "id": "5",
+            "sourceField": "身体情况",
+            "targetField": "身体情况"
+        },
+        {
+            "id": "6",
+            "sourceField": "每份样本数量",
+            "targetField": "每份样本数量",
+            "children": [
+                {
+                    "sourceField": "2ug",
+                    "targetField": "{x+20}份",
+                    "isChildren": "true"
+                }
+            ]
+        },
+        {
+            "id": "7",
+            "sourceField": "捐献人编号",
+            "targetField": "捐献人编号"
+        },
+        {
+            "id": "8",
+            "sourceField": "年龄",
+            "targetField": "年龄"
+        },
+        {
+            "id": "9",
+            "sourceField": "保存机构名称",
+            "targetField": "保存机构名称"
+        },
+        {
+            "id": "10",
+            "sourceField": "性别",
+            "targetField": "性别",
+            "children": [
+                {
+                    "sourceField": "男",
+                    "targetField": "man",
+                    "isChildren": "true"
+                },
+                {
+                    "sourceField": "女",
+                    "targetField": "woman",
+                    "isChildren": "true"
+                }
+            ]
+        }
+    ],
+    "relation_id": "35"
+}
