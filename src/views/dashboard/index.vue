@@ -17,7 +17,7 @@
               </div>
 
               <el-table :data="NewPriitems" element-loading-text="Loading" border stripe fit highlight-current-row>
-                <el-table-column align="center" label="ID" width="95">
+                <el-table-column align="center" label="唯一标识" width="95">
                   <template slot-scope="scope">
                     {{ scope.row.id }}
                   </template>
@@ -34,10 +34,10 @@
                   </template>
                 </el-table-column>
 
-                <el-table-column label="创建时间" width="180px" align="center">
-                  <template slot-scope="scope">
+                <el-table-column label="创建时间" prop="gTableTime" width="180px" :sortable="true" align="center">
+                  <!-- <template slot-scope="scope">
                     {{ scope.row.gTableTime }}
-                  </template>
+                  </template> -->
                 </el-table-column>
 
                 <el-table-column label="创建单位" width="180px" align="center">
@@ -166,7 +166,7 @@
               </div>
 
               <el-table :data="NewPubitems" element-loading-text="Loading" border stripe fit highlight-current-row>
-                <el-table-column align="center" label="ID" width="95">
+                <el-table-column align="center" label="唯一标识" width="95">
                   <template slot-scope="scope">
                     {{ scope.row.id }}
                   </template>
@@ -183,7 +183,7 @@
                   </template>
                 </el-table-column>
 
-                <el-table-column label="创建时间" width="180px" align="center">
+                <el-table-column label="创建时间" prop="gTableTime" width="180px" :sortable="true" align="center">
                   <template slot-scope="scope">
                     {{ scope.row.gTableTime }}
                   </template>
