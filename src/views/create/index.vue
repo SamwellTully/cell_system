@@ -88,7 +88,7 @@
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
               <el-popconfirm @onConfirm="handleDelete(scope.$index, scope.row)" title="确定删除该列吗？">
-                <el-button slot="reference" size="mini" type="danger" >删除
+                <el-button slot="reference" size="mini" type="danger">删除
                 </el-button>
               </el-popconfirm>
             </template>
@@ -122,7 +122,7 @@
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
               <el-popconfirm @onConfirm="handleDelete(scope.$index, scope.row)" title="确定删除该列吗？">
-                <el-button slot="reference" size="mini" type="danger" >删除
+                <el-button slot="reference" size="mini" type="danger">删除
                 </el-button>
               </el-popconfirm>
             </template>
@@ -165,7 +165,16 @@
         <el-form-item prop="maxLength" v-if="editForm.fieldType != 'enum'" label="最大长度:">
           <el-input v-model="editForm.maxLength" placeholder="请输入该列内容最大长度"></el-input>
         </el-form-item>
-        <div style="" v-if="editForm.fieldType == 'enum'">
+        <div style="" v-if="editForm.fieldType == 'enum' && keys.includes(editForm.attributename)">
+          <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" label="枚举项:">
+            <el-select v-model="enumerationForSelect" multiple collapse-tags style="" placeholder="请选择枚举项">
+              <el-option v-for="item in editForm.SampleArray" :key="item" :label="item" :value="item">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </div>
+
+        <div style="" v-if="editForm.fieldType == 'enum' && !keys.includes(editForm.attributename)">
           <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" v-for="(v, index) in editForm.enumeration"
             :key="v.key" :prop="'enumeration.' + index + '.value'" :label="'枚举项' + (index + 1) + ':'">
             <el-col :span="12">
@@ -188,15 +197,15 @@
           </el-select>
         </el-form-item>
         <el-form-item prop="sample" :rules="[{ required: true, message: '示范数据不能为空' }]" label="示范数据:">
-          <el-input v-show="!isAuto" v-model="editForm.sample" placeholder="请输入该列示范数据"></el-input>
-          <el-select v-show="isAuto" v-model="editForm.sample" placeholder="请输入该列示范数据">
+          <el-input v-show="!isAuto || !keys.includes(editForm.attributename)" v-model="editForm.sample" placeholder="请输入该列示范数据"></el-input>
+          <el-select v-show="isAuto && keys.includes(editForm.attributename)" v-model="editForm.sample" placeholder="请输入该列示范数据">
             <el-option v-for="item in currentSampleArray" :key="item" :label="item" :value="item">
             </el-option>
           </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="editFormVisible = false">取 消</el-button>
+        <el-button @click="editFormVisible = false;enumerationForSelect = []">取 消</el-button>
         <el-button type="primary" @click="clickEdit">确 定</el-button>
       </div>
     </el-dialog>
@@ -303,6 +312,8 @@ export default {
       }, 500);
     };
     return {
+      selectedRowIndexForSelect: -1,
+      enumerationForSelect: [],
       keys: [],
       file: null,
       filedata: null,
@@ -522,12 +533,18 @@ export default {
         if (!valid) {
           return
         }
-
+        
+        if(this.editForm.fieldType == "enum" && this.enumerationForSelect != [] && this.keys.includes(this.editForm.attributename)){ // 首先将enumerationForSelect转化为enumeration
+          this.editForm.enumeration = []
+          for(let i = 0; i < this.enumerationForSelect.length; i ++){
+            this.editForm.enumeration.push({value: this.enumerationForSelect[i]})
+          }
+        }
+        
         // 若是枚举类，则判断示范数据是否包含在枚举项中
         let flag = false
         if (this.editForm.fieldType == "enum") {
           for (let i = 0; i < this.editForm.enumeration.length; i++) {
-            console.log("testttttt")
             console.log(this.editForm.enumeration[i].value)
             if (this.editForm.sample === this.editForm.enumeration[i].value) {
               flag = true
@@ -535,7 +552,7 @@ export default {
             }
           }
         }
-        if (!flag && this.tableForm.fieldType == "enum") {
+        if (!flag && this.editForm.fieldType == "enum") {
           this.$notify.error({
             title: '错误',
             message: '示范数据必须为枚举项'
@@ -594,9 +611,13 @@ export default {
 
         // 示范数据
         this.samples[this.selectedRowIndex][this.editForm.attributename] = this.editForm.sample
+        // 修改
+        this.tableFormList[this.selectedRowIndexForSelect] = JSON.parse(JSON.stringify(this.editForm))
+        this.tableFormList[this.selectedRowIndexForSelect]['enumerationForSelect'] = this.enumerationForSelect
         this.editFormVisible = false;
         console.log("edit ------ end")
       })
+      this.enumerationForSelect = []
     },
     next() {
       if (this.active == 1 && (this.tableHeader.dataname == "" || this.tableHeader.descript == "")) {
@@ -654,10 +675,21 @@ export default {
     },
     handleEdit(index, row) {
       this.editFormVisible = true;
-      this.editForm = this.tableFormList[index];
-      this.currentSampleArray = this.sampleSet[this.editForm.attributename]
+      this.selectedRowIndexForSelect = index
+      this.editForm = JSON.parse(JSON.stringify(this.tableFormList[index])); // 进行深层复制，防止用户点击取消时，数据仍然改变了
+      if(this.keys.includes(this.editForm.attributename)){
+        this.currentSampleArray = this.sampleSet[this.editForm.attributename]
+        this.editForm['SampleArray'] = this.currentSampleArray
+      }else{
+        this.currentSampleArray = []
+        this.editForm['SampleArray'] = []
+      }
+      if(this.editForm.enumerationForSelect){
+        this.enumerationForSelect = this.editForm.enumerationForSelect
+      }
+      console.log("handle Edit")
       console.log(this.editForm)
-      console.log(this.tableFormList)
+      console.log("handle Edit Done")
       this.selectedRowIndex = index
     },
     handleDelete(index, row) { // 删除一行

@@ -111,6 +111,19 @@ export const constantRoutes = [
     hidden: true
   },
 
+  {
+    path: '/translate',
+    component: Layout,
+    children: [
+      {
+        path: 'information',
+        name: 'Translate',
+        component: () => import('@/views/translate/index'),
+        meta: { title: '数据转换', icon: 'el-icon-s-order', keepAlive: true }
+      }
+    ],
+    hidden: true
+  },
 
 
   {

@@ -73,7 +73,16 @@
 
                 </el-table-column>
 
-                <el-table-column label="操作4" width="110" align="center">
+                <el-table-column class-name="status-col" label="操作4" width="110" align="center">
+
+                  <template slot-scope="scope">
+                    <el-button @click="jumpTrans(scope.row.gTalename)">映射</el-button>
+                  </template>
+
+
+                </el-table-column>
+
+                <el-table-column label="操作5" width="110" align="center">
                   <template slot-scope="scope">
                     <el-button type="primary" @click="openForPrivate(scope.row.gTalename)">导出</el-button>
                   </template>
@@ -215,7 +224,14 @@
 
                 </el-table-column>
 
-                <el-table-column label="操作4" width="110" align="center">
+                <el-table-column class-name="status-col" label="操作4" width="110" align="center">
+
+                  <template slot-scope="scope">
+                    <el-button @click="jumpTrans(scope.row.gTalename)">映射</el-button>
+                  </template>
+
+                </el-table-column>
+                <el-table-column label="操作5" width="110" align="center">
                   <template slot-scope="scope">
                     <el-button type="primary" @click="openForPublic(scope.row.gTalename)">导出</el-button>
                   </template>
@@ -866,6 +882,15 @@ export default {
       // this.$router.push('/example/publish', 1)
       this.$router.push({
         name: "Example",
+        params: {
+          tableName: val,
+        },
+      });
+    },
+    jumpTrans(val) {
+      // this.$router.push('/example/publish', 1)
+      this.$router.push({
+        name: "Mapping",
         params: {
           tableName: val,
         },
