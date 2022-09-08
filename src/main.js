@@ -7,6 +7,8 @@ Vue.prototype.$axios = axios
 
 import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 
+import {saveAs} from 'file-saver'; //字符串转文件下载所需包
+
 import ElementUI from 'element-ui'
 import { MessageBox } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'

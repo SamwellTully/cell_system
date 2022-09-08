@@ -225,22 +225,45 @@ export default {
             data: formData,
             params:{tableName:selectTableName, relationString:JSON.stringify(selectAllKeysDic)}
             }).then((response) => {
-              console.log(response)
-              if(response.data.code != 200){
-                //非正确返回值
-                this.fullscreenLoading = false;
-                this.$alert("上传文件内容有误，请重新上传", "提示", {
-                confirmButtonText: "确定",
-                callback: (action) => {
-                  if (action === "confirm") {
-                    this.$router.push({
-                    name: "Example",
-                    params: {
-                    tableName: selectTableName, 
-                    //跳转至上传页面时携带所选表页面
-                    },
-                  });
+                if(response.data.code != 200){
+                  //非正确返回值
+                  this.fullscreenLoading = false;
+                  this.$alert("上传文件失败，请重新上传", "提示", {
+                  confirmButtonText: "确定",
+                  callback: (action) => {
+                    if (action === "confirm") {
+                      this.$router.push({
+                      name: "Example",
+                      params: {
+                      tableName: selectTableName, 
+                      //跳转至上传页面时携带所选表页面
+                      },
+                    });
                   }
+                },
+              });
+            }else if(response.data.data.wrongInfList.length != 0){
+                  this.fullscreenLoading = false;
+                  this.$alert("上传文件内容有误，请重新上传", "提示", {
+                  confirmButtonText: "确定",
+                  callback: (action) => {
+                    if (action === "confirm") {
+                      this.$router.push({
+                      name: "Example",
+                      params: {
+                      tableName: selectTableName, 
+                      //跳转至上传页面时携带所选表页面
+                      },
+                    });
+                  }
+                  //输出至文本的字符串
+                  let wrongList = '';
+                  for(let i = 0; i < response.data.data.wrongInfList.length; i++){
+                    wrongList += (response.data.data.wrongInfList[i] + '\n'); //添加换行符
+                  }
+                  //var data = JSON.stringify(response.data.data.wrongInfList);
+                  let str = new Blob([wrongList] , {type : 'text/plain;charset=utf-8'});
+                  saveAs(str,'错误信息.txt');
                 },
               });
             }
