@@ -12,7 +12,7 @@
       </el-col>
 
       <el-col :span="7">
-        <div class="grid-content">
+        <!-- <div class="grid-content">
           <h3>
             目标字段组<template>
               <el-select v-model="value" @change="handleSelectChange" style="margin-left: 10px">
@@ -21,12 +21,12 @@
               </el-select>
             </template>
           </h3>
-        </div>
+        </div> -->
       </el-col>
       <el-col :span="2">
-        <div class="grid-content">
+        <!-- <div class="grid-content">
           <el-button type="primary" @click="add" style="width: 90px">关联</el-button>
-        </div>
+        </div> -->
       </el-col>
       <el-col :span="2">
         <div class="grid-content">
@@ -62,7 +62,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="目标字段组" prop="name"> </el-table-column>
+          <el-table-column label="目标文件" prop="name"> </el-table-column>
 
           <el-table-column label="操作">
             <template slot-scope="scope">
@@ -190,16 +190,16 @@
         <div class="grid-content"></div>
       </el-col>
 
-      <el-col :span="6">
+      <!-- <el-col :span="6">
         <div class="grid-content">
           <el-button @click="saveMappings()" type="primary" style="width: 100%">保存映射</el-button>
         </div>
-      </el-col>
+      </el-col> -->
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
     </el-row>
-    <!-- <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+    <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="20">
         <div class="grid-content">
           <template>
@@ -223,7 +223,7 @@
       </el-col>
     </el-row> -->
 
-    <!-- <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+    <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
@@ -236,7 +236,7 @@
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
-    </el-row> -->
+    </el-row>
   </div>
 </template>
 
@@ -448,16 +448,23 @@ export default {
       var mapping_response = await checkRelation(this.userInfo.userId)
       // console.log(mapping_response_str)
       // var mapping_response = eval("(" + mapping_response_str + ")")
-      var mapping_data = mapping_response.data[0]
+      var mapping_data = [];
+      for(let i = 0; i < mapping_response.data.length; i++){
+        if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile != ''){
+          mapping_data.push(mapping_response.data[i]);
+        }
+      }
       for (var item in mapping_data) {
         var his_mapping_item = {}
         //this.value为表名
-        //item
-        var relation_maps_str = await checkContext(this.userInfo.userId, this.value, item);
+        //原item为映射id，现item
+        // var relation_maps_str = await checkContext(this.userInfo.userId, this.value, item);
+        var relation_maps_str = await checkContext(null,null,mapping_data[item].id);
         var relation_map = JSON.parse(relation_maps_str.data[0])
-        his_mapping_item["name"] = this.value
-        his_mapping_item["map"] = mapping_data[item]
-        his_mapping_item["relation_id"] = item
+        // his_mapping_item["name"] = this.value
+        his_mapping_item["name"] = mapping_data[item].targetFile
+        his_mapping_item["map"] = mapping_data[item].fieldReplace
+        his_mapping_item["relation_id"] = mapping_data[item].id
         for (var replace_key in relation_map) {
           this.relation_map[replace_key] = relation_map[replace_key]
         }

@@ -19,7 +19,7 @@
               <el-table :data="NewPriitems" element-loading-text="Loading" border stripe fit highlight-current-row>
                 <el-table-column align="center" label="唯一标识" width="95">
                   <template slot-scope="scope">
-                    {{ scope.row.id }}
+                    {{ scope.row.gTableidentification }}
                   </template>
                 </el-table-column>
                 <el-table-column label="文件名称" width="150px" align="center">
@@ -168,7 +168,7 @@
               <el-table :data="NewPubitems" element-loading-text="Loading" border stripe fit highlight-current-row>
                 <el-table-column align="center" label="唯一标识" width="95">
                   <template slot-scope="scope">
-                    {{ scope.row.id }}
+                    {{ scope.row.gTableidentification }}
                   </template>
                 </el-table-column>
                 <el-table-column label="文件名称" width="150px" align="center">
