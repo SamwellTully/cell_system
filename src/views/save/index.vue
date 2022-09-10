@@ -128,6 +128,7 @@ export default {
     console.info(this.relationMap);
     console.info(this.tableName);
     console.info(this.tableHeader)
+    this.exportData();
   },
 
   methods: {
@@ -224,11 +225,18 @@ export default {
           this.downloadProgressShow = false;
           this.$alert("导出成功,请于下载路径或默认路径获取文件", "提示", {
             confirmButtonText: "确定",
-            callback: (action) => {},
+            callback: (action) => {
+                if (action === "confirm") {
+                  this.$router.push({
+                  name: "Dashboard",
+                });
+              }
+            },
           });
         }, 5000)
         
-    });
+      });
+      
         // this.$http.post("http://localhost:8000/save/exportData", JSON.stringify(data)).then((response) => {
         // this.$alert("导出成功", "提示", {
         //   confirmButtonText: "确定",

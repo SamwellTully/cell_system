@@ -24,9 +24,9 @@
         </div> -->
       </el-col>
       <el-col :span="2">
-        <!-- <div class="grid-content">
+        <div class="grid-content">
           <el-button type="primary" @click="add" style="width: 90px">关联</el-button>
-        </div> -->
+        </div>
       </el-col>
       <el-col :span="2">
         <div class="grid-content">
@@ -221,7 +221,7 @@
           </template>
         </div>
       </el-col>
-    </el-row> -->
+    </el-row> 
 
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="6">
@@ -230,7 +230,7 @@
 
       <el-col :span="6">
         <div class="grid-content">
-          <el-button @click="replacementAll()" type="primary" style="width: 100%">提交</el-button>
+          <el-button @click="replacementAll()" type="primary" style="width: 100%">下载到本地</el-button>
         </div>
       </el-col>
       <el-col :span="6">
@@ -453,6 +453,9 @@ export default {
         if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile != ''){
           mapping_data.push(mapping_response.data[i]);
         }
+        // if( mapping_response.data[i].targetFile != ''){
+        //   mapping_data.push(mapping_response.data[i]);
+        // }
       }
       for (var item in mapping_data) {
         var his_mapping_item = {}
@@ -463,9 +466,13 @@ export default {
         var relation_map = JSON.parse(relation_maps_str.data[0])
         // his_mapping_item["name"] = this.value
         his_mapping_item["name"] = mapping_data[item].targetFile
-        his_mapping_item["map"] = mapping_data[item].fieldReplace
+        his_mapping_item["map"] = JSON.parse(mapping_data[item].fieldReplace)
         his_mapping_item["relation_id"] = mapping_data[item].id
         for (var replace_key in relation_map) {
+          console.log("rekey")
+          console.log(replace_key)
+          console.log(this.relation_map)
+          console.log(relation_map)
           this.relation_map[replace_key] = relation_map[replace_key]
         }
         his_mapping_item["relation"] = relation_map
@@ -1021,7 +1028,7 @@ export default {
           tableHeader.push({ key: key });
         });
 
-        this.$alert("替换成功", "提示", {
+        this.$alert("请确认下载", "提示", {
           confirmButtonText: "确定",
           callback: (action) => {
             if (action === "confirm") {

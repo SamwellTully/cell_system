@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
-      <el-col :span="9">
+      <el-col :span="9" >
         <div class="grid-content">
-          <h3>未关联字段</h3>
+          <h3>{{this.chosenTable}}</h3>
         </div>
       </el-col>
 
@@ -14,7 +14,7 @@
       <el-col :span="7">
         <div class="grid-content">
           <h3>
-            目标字段组<template>
+            目标文件<template>
               <el-select v-model="value" @change="handleSelectChange" style="margin-left: 10px">
                 <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
@@ -192,13 +192,17 @@
 
       <el-col :span="6">
         <div class="grid-content">
-          <el-button @click="saveMappings()" type="primary" style="width: 100%">保存映射</el-button>
+          <el-button @click="saveMappingsInput()" type="primary" style="width: 100%">保存映射</el-button>
         </div>
       </el-col>
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
     </el-row>
+    <el-dialog class="input-container" title="请输入映射名称" :visible.sync="mappingNameVisable" :center="true">
+      <el-input v-model="mappingName"></el-input>
+      <el-button type="primary" @click="saveMappings()" :center="true">提 交</el-button>
+    </el-dialog>
     <!-- <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="20">
         <div class="grid-content">
@@ -314,6 +318,9 @@ import { checkRelation, checkContext, deleteHisMapping } from "@/api/mapping"
 export default {
   data() {
     return {
+      chosenTable:" ",
+      mappingName:'',
+      mappingNameVisable:false,
       relation_map: {},
       userInfo: {},
       historicalMapping: [],
@@ -376,22 +383,23 @@ export default {
       matchingValue: [], //已关联字段的展开的表格数据，即所展开的该字段的内容替换数据
     };
   },
+  
 
-  async created() {
+  async activated() {
     //获取用户信息
     var getUserInfoResponse = await this.getUserInfo()
     this.userInfo = getUserInfoResponse.data
     //初始化未关联字段表格数据，获取table1数据
-    this.originalField = this.$route.params.val;
-    this.table1 = this.originalField;
+    //this.originalField = this.$route.params.val;
+    //this.table1 = this.originalField;
     //获取上传文件
-    this.file = this.$route.params.file;
+    //this.file = this.$route.params.file;
     //获取上传文件的json数据
-    this.fileOriginalData = this.$route.params.data;
+    //this.fileOriginalData = this.$route.params.data;
 
     //初始化目标字段组多选框选中的表名
+    this.chosenTable = this.$route.params.tableName;
     this.value = this.$route.params.tableName;
-
     //获取数据库中的所有表名
     setTimeout(() => {
       this.getDatabase();
@@ -409,6 +417,7 @@ export default {
           delete_time_and_operator.push(x[i])
         }
       }
+      this.table1 = delete_time_and_operator;
       this.table2 = delete_time_and_operator;
     }, 600);
 
@@ -448,16 +457,26 @@ export default {
       var mapping_response = await checkRelation(this.userInfo.userId)
       // console.log(mapping_response_str)
       // var mapping_response = eval("(" + mapping_response_str + ")")
-      var mapping_data = mapping_response.data[0]
+      var mapping_data = [];
+      for(let i = 0; i < mapping_response.data.length; i++){
+        // if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile != ''){
+        //   mapping_data.push(mapping_response.data[i]);
+        // }
+        if( mapping_response.data[i].targetFile != ''){
+          mapping_data.push(mapping_response.data[i]);
+        }
+      }
       for (var item in mapping_data) {
         var his_mapping_item = {}
         //this.value为表名
-        //item
-        var relation_maps_str = await checkContext(this.userInfo.userId, this.value, item);
+        //原item为映射id，现item
+        // var relation_maps_str = await checkContext(this.userInfo.userId, this.value, item);
+        var relation_maps_str = await checkContext(null,null,mapping_data[item].id);
         var relation_map = JSON.parse(relation_maps_str.data[0])
-        his_mapping_item["name"] = this.value
-        his_mapping_item["map"] = mapping_data[item]
-        his_mapping_item["relation_id"] = item
+        // his_mapping_item["name"] = this.value
+        his_mapping_item["name"] = mapping_data[item].targetFile
+        his_mapping_item["map"] = JSON.parse(mapping_data[item].fieldReplace)
+        his_mapping_item["relation_id"] = mapping_data[item].id
         for (var replace_key in relation_map) {
           this.relation_map[replace_key] = relation_map[replace_key]
         }
@@ -548,8 +567,12 @@ export default {
       this.refdata();
     },
 
+    saveMappingsInput(){
+      this.mappingNameVisable = true;
+    },
     //保存历史映射
     async saveMappings() {
+      this.mappingNameVisable = false;
       let obj1 = {};
       for (let i = 0; i < this.table3.length; i++) {
         obj1[this.table3[i]["key"]] = this.table3[i]["value"];
@@ -568,15 +591,23 @@ export default {
 
       let data = new FormData();
       data.append("UserId", this.userInfo.userId);
-      data.append("Tablename", this.value);
-      data.append("RelationString", JSON.stringify(obj1));
-      data.append("HashString", JSON.stringify(replace_infos));
+      data.append("sourcefile ", this.chosenTable);
+      data.append("targetfile", this.value)
+      data.append("fieldReplace", JSON.stringify(obj1));
+      data.append("contentReplace", JSON.stringify(replace_infos));
+      data.append("mappingName ",this.mappingName)
       this.$http
         .post("http://8.134.49.56:8000/mappings/increase", data)
         .then((res) => {
           this.$alert("保存成功", "提示", {
             confirmButtonText: "确定",
-            callback: (action) => { },
+            callback: (action) => {
+              if (action === "confirm") {
+                this.$router.push({
+                  name: "Dashboard",
+                });
+              }
+             },
           });
           this.getHistoricalMapping();
         });
