@@ -25,6 +25,24 @@
       </el-col>
       <el-col :span="2">
         <div class="grid-content">
+          <el-button type="primary" @click="clickSearch" style="width: 90px">搜索</el-button>
+        </div>
+      </el-col>
+      <el-dialog title="点击选取映射表" :visible.sync="inputSearchVisable">
+        <form>
+          <el-input type="text" v-model="inputText" placeholder="请输入您要搜索的表名" />
+          <table border="1" cellspacing="0">
+            <table>
+              <li v-for="data in newoptions" :key="data.value" @click="searchTable(data.value)">  
+              <!-- data为在搜索中选中的表 -->
+                {{data.value}}
+              </li>
+            </table>
+          </table>
+        </form>
+      </el-dialog>
+      <el-col :span="2">
+        <div class="grid-content">
           <el-button type="primary" @click="add" style="width: 90px">关联</el-button>
         </div>
       </el-col>
@@ -38,7 +56,7 @@
           <el-button type="primary" @click="showHistoricalMapping = true" style="width: 90px">历史映射</el-button>
         </div>
       </el-col>
-
+      
       <el-dialog title="历史映射信息" :visible.sync="showHistoricalMapping">
         <el-table max-height="500" :data="historicalMapping" :row-click="clickHistoricalMapping">
           <el-table-column type="expand">
@@ -274,6 +292,35 @@
   padding: 10px 0;
   background-color: #f9fafc;
 }
+/* 搜索框1
+.bar1 {background: #A3D0C3; }
+.bar1 input {
+  border: 2px solid #7BA7AB;
+  border-radius: 5px;
+  background: #F9F0DA;
+  color: #9E9C9C;
+}
+.bar1 button {
+  top: 0;
+  right: 0;
+  background: #7BA7AB;
+  border-radius: 0 5px 5px 0;
+}
+.bar1 button:before {
+  content: "\f002";
+  font-family: FontAwesome,serif;
+  font-size: 16px;
+  color: #F9F0DA;
+}
+li{
+  text-align: left;
+  width:100%;
+  background: #F9F0DA;
+  list-style: none;
+}
+li:hover{
+  background: #666666;
+} */
 </style>
 
 <style>
@@ -318,9 +365,11 @@ import { checkRelation, checkContext, deleteHisMapping } from "@/api/mapping"
 export default {
   data() {
     return {
+      inputText:"",
       chosenTable:" ",
       mappingName:'',
       mappingNameVisable:false,
+      inputSearchVisable:false,
       relation_map: {},
       userInfo: {},
       historicalMapping: [],
@@ -329,6 +378,8 @@ export default {
       selectedHistoricalMappingDate: {},
 
       options: [], //目标字段组多选框数据（表名集合）
+      newoptions: [], //用于目标表的搜索
+
       value: " ", //当前选中表名
 
       table1: [], //未关联字段表格数据
@@ -384,7 +435,6 @@ export default {
     };
   },
   
-
   async activated() {
     //获取用户信息
     var getUserInfoResponse = await this.getUserInfo()
@@ -399,7 +449,7 @@ export default {
 
     //初始化目标字段组多选框选中的表名
     this.chosenTable = this.$route.params.tableName;
-    this.value = this.$route.params.tableName;
+    this.value = this.$route.params.tableName; //this.value默认为表二
     //获取数据库中的所有表名
     setTimeout(() => {
       this.getDatabase();
@@ -439,7 +489,64 @@ export default {
     await this.getHistoricalMapping();
   },
 
+  watch:{
+    inputText:function(newText){
+      if(newText.length>0){
+        this.newoptions.splice(0,this.newoptions.length);//清空之前数组
+        for(let value of this.options){
+          if(value.value.indexOf(newText)>-1){// 可以直接用indexOf(属性)
+            this.newoptions.push({
+              label:value.label,
+              value:value.value
+            });//一定要加this
+          }
+        }
+      }else{
+        this.newoptions=[];//输入框为空，等于原始数据
+      }
+    }
+  },
   methods: {
+    clickSearch(){
+      this.inputSearchVisable = true;
+    },
+    async searchTable(val){
+      this.value = val;
+      //根据表名获取目标字段表格数据
+      var x = null;
+      setTimeout(() => {
+        x = this.getData(this.value);
+      }, 300);
+      setTimeout(() => {
+        let delete_time_and_operator = []
+        for (var i = 0; i < x.length; i++) {
+          if (x[i].key != "导入时间" && x[i].key != "操作用户") {
+            delete_time_and_operator.push(x[i])
+          }
+        }
+        this.table2 = delete_time_and_operator;
+      }, 600);
+
+      //刷新，为表格数据打上标志位，用于控制双击取消选中
+      setTimeout(() => {
+        this.refdata();
+        this.resetTabele(this.table1);
+        this.resetTabele(this.table2);
+        this.addFlag();
+      }, 900);
+
+      //遍历文件得到的各字段的所有源值取值，获取源值的多选框数据
+      setTimeout(() => {
+        this.getFileSeletionData();
+      }, 1000);
+
+      //获取历史映射数据
+
+      await this.getHistoricalMapping();
+      this.inputSearchVisable = false;
+      this.inputText = '';
+    },
+
     async deleteHisMapping(his_mapping_id){
       await deleteHisMapping(this.userInfo.userId, this.value, his_mapping_id)
     },
