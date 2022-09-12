@@ -1,14 +1,20 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+
+      <el-col :span="3">
+        <div class="grid-content" ></div>
+      </el-col>
+
       <el-col :span="9">
         <div class="grid-content">
           <h3>上传表字段</h3>
         </div>
       </el-col>
 
-      <el-col :span="2">
-        <div class="grid-content"></div>
+      <!-- :span代表所占栅数 -->
+      <el-col :span="5">
+        <div class="grid-content" ></div>
       </el-col>
 
       <el-col :span="7">
@@ -22,6 +28,9 @@
             </template>
           </h3>
         </div> -->
+        <div class="grid-content" >
+          <h3>{{this.value}}</h3>
+        </div>
       </el-col>
       <el-col :span="2">
         <div class="grid-content">
@@ -469,10 +478,6 @@ export default {
         his_mapping_item["map"] = JSON.parse(mapping_data[item].fieldReplace)
         his_mapping_item["relation_id"] = mapping_data[item].id
         for (var replace_key in relation_map) {
-          console.log("rekey")
-          console.log(replace_key)
-          console.log(this.relation_map)
-          console.log(relation_map)
           this.relation_map[replace_key] = relation_map[replace_key]
         }
         his_mapping_item["relation"] = relation_map

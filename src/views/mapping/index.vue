@@ -1,21 +1,22 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+
+      <el-col :span="2">
+        <div class="grid-content" ></div>
+      </el-col>
+
       <el-col :span="9" >
         <div class="grid-content">
           <h3>{{this.chosenTable}}</h3>
         </div>
       </el-col>
 
-      <el-col :span="2">
-        <div class="grid-content"></div>
-      </el-col>
-
-      <el-col :span="7">
+      <el-col :span="6">
         <div class="grid-content">
           <h3>
             目标文件<template>
-              <el-select v-model="value" @change="handleSelectChange" style="margin-left: 10px">
+              <el-select v-model="value" @change="handleSelectChange" style="margin-left: 10px" filterable="true">
                 <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
@@ -23,7 +24,7 @@
           </h3>
         </div>
       </el-col>
-      <el-col :span="2">
+      <!-- <el-col :span="2">
         <div class="grid-content">
           <el-button type="primary" @click="clickSearch" style="width: 90px">搜索</el-button>
         </div>
@@ -34,13 +35,13 @@
           <table border="1" cellspacing="0">
             <table>
               <li v-for="data in newoptions" :key="data.value" @click="searchTable(data.value)">  
-              <!-- data为在搜索中选中的表 -->
-                {{data.value}}
+              data为在搜索中选中的表 -->
+                <!-- {{data.value}}
               </li>
             </table>
           </table>
         </form>
-      </el-dialog>
+      </el-dialog> -->
       <el-col :span="2">
         <div class="grid-content">
           <el-button type="primary" @click="add" style="width: 90px">关联</el-button>
@@ -80,7 +81,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="目标字段组" prop="name"> </el-table-column>
+          <el-table-column label="目标表" prop="name"> </el-table-column>
 
           <el-table-column label="操作">
             <template slot-scope="scope">
@@ -208,20 +209,39 @@
         <div class="grid-content"></div>
       </el-col>
 
-      <el-col :span="6">
+      <!-- <el-col :span="6">
         <div class="grid-content">
           <el-button @click="saveMappingsInput()" type="primary" style="width: 100%">保存映射</el-button>
         </div>
-      </el-col>
+      </el-col> -->
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
     </el-row>
     <el-dialog class="input-container" title="请输入映射名称" :visible.sync="mappingNameVisable" :center="true">
       <el-input v-model="mappingName"></el-input>
-      <el-button type="primary" @click="saveMappings()" :center="true">提 交</el-button>
+      <el-row></el-row>
+      <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+
+        <!-- 作空格用 -->
+        <el-col :span="6">
+          <div class="grid-content"></div> 
+        </el-col>
+
+        <el-col :span="6">
+          <div class="grid-content">
+            <el-button type="primary" @click="saveMappings()" style="width: 100%">提 交</el-button>
+          </div>
+        </el-col>
+
+        <el-col :span="6">
+          <div class="grid-content"></div>
+        </el-col>
+
+      </el-row>
+      
     </el-dialog>
-    <!-- <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+    <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="20">
         <div class="grid-content">
           <template>
@@ -243,22 +263,22 @@
           </template>
         </div>
       </el-col>
-    </el-row> -->
+    </el-row>
 
-    <!-- <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+    <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
 
       <el-col :span="6">
         <div class="grid-content">
-          <el-button @click="replacementAll()" type="primary" style="width: 100%">提交</el-button>
+          <el-button @click="saveMappingsInput()" type="primary" style="width: 100%">保存映射</el-button>
         </div>
       </el-col>
       <el-col :span="6">
         <div class="grid-content"></div>
       </el-col>
-    </el-row> -->
+    </el-row>
   </div>
 </template>
 
@@ -369,7 +389,7 @@ export default {
       chosenTable:" ",
       mappingName:'',
       mappingNameVisable:false,
-      inputSearchVisable:false,
+      // inputSearchVisable:false,
       relation_map: {},
       userInfo: {},
       historicalMapping: [],
@@ -378,7 +398,7 @@ export default {
       selectedHistoricalMappingDate: {},
 
       options: [], //目标字段组多选框数据（表名集合）
-      newoptions: [], //用于目标表的搜索
+      // newoptions: [], //用于目标表的搜索
 
       value: " ", //当前选中表名
 
@@ -489,63 +509,63 @@ export default {
     await this.getHistoricalMapping();
   },
 
-  watch:{
-    inputText:function(newText){
-      if(newText.length>0){
-        this.newoptions.splice(0,this.newoptions.length);//清空之前数组
-        for(let value of this.options){
-          if(value.value.indexOf(newText)>-1){// 可以直接用indexOf(属性)
-            this.newoptions.push({
-              label:value.label,
-              value:value.value
-            });//一定要加this
-          }
-        }
-      }else{
-        this.newoptions=[];//输入框为空，等于原始数据
-      }
-    }
-  },
+  // watch:{
+  //   inputText:function(newText){
+  //     if(newText.length>0){
+  //       this.newoptions.splice(0,this.newoptions.length);//清空之前数组
+  //       for(let value of this.options){
+  //         if(value.value.indexOf(newText)>-1){// 可以直接用indexOf(属性)
+  //           this.newoptions.push({
+  //             label:value.label,
+  //             value:value.value
+  //           });//一定要加this
+  //         }
+  //       }
+  //     }else{
+  //       this.newoptions=[];//输入框为空，等于原始数据
+  //     }
+  //   }
+  // },
   methods: {
-    clickSearch(){
-      this.inputSearchVisable = true;
-    },
-    async searchTable(val){
-      this.value = val;
-      //根据表名获取目标字段表格数据
-      var x = null;
-      setTimeout(() => {
-        x = this.getData(this.value);
-      }, 300);
-      setTimeout(() => {
-        let delete_time_and_operator = []
-        for (var i = 0; i < x.length; i++) {
-          if (x[i].key != "导入时间" && x[i].key != "操作用户") {
-            delete_time_and_operator.push(x[i])
-          }
-        }
-        this.table2 = delete_time_and_operator;
-      }, 600);
+    // clickSearch(){
+    //   this.inputSearchVisable = true;
+    // },
+    // async searchTable(val){
+    //   this.value = val;
+    //   //根据表名获取目标字段表格数据
+    //   var x = null;
+    //   setTimeout(() => {
+    //     x = this.getData(this.value);
+    //   }, 300);
+    //   setTimeout(() => {
+    //     let delete_time_and_operator = []
+    //     for (var i = 0; i < x.length; i++) {
+    //       if (x[i].key != "导入时间" && x[i].key != "操作用户") {
+    //         delete_time_and_operator.push(x[i])
+    //       }
+    //     }
+    //     this.table2 = delete_time_and_operator;
+    //   }, 600);
 
-      //刷新，为表格数据打上标志位，用于控制双击取消选中
-      setTimeout(() => {
-        this.refdata();
-        this.resetTabele(this.table1);
-        this.resetTabele(this.table2);
-        this.addFlag();
-      }, 900);
+    //   //刷新，为表格数据打上标志位，用于控制双击取消选中
+    //   setTimeout(() => {
+    //     this.refdata();
+    //     this.resetTabele(this.table1);
+    //     this.resetTabele(this.table2);
+    //     this.addFlag();
+    //   }, 900);
 
-      //遍历文件得到的各字段的所有源值取值，获取源值的多选框数据
-      setTimeout(() => {
-        this.getFileSeletionData();
-      }, 1000);
+    //   //遍历文件得到的各字段的所有源值取值，获取源值的多选框数据
+    //   setTimeout(() => {
+    //     this.getFileSeletionData();
+    //   }, 1000);
 
-      //获取历史映射数据
+    //   //获取历史映射数据
 
-      await this.getHistoricalMapping();
-      this.inputSearchVisable = false;
-      this.inputText = '';
-    },
+    //   await this.getHistoricalMapping();
+    //   this.inputSearchVisable = false;
+    //   this.inputText = '';
+    // },
 
     async deleteHisMapping(his_mapping_id){
       await deleteHisMapping(this.userInfo.userId, this.value, his_mapping_id)
@@ -566,12 +586,15 @@ export default {
       // var mapping_response = eval("(" + mapping_response_str + ")")
       var mapping_data = [];
       for(let i = 0; i < mapping_response.data.length; i++){
-        // if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile != ''){
-        //   mapping_data.push(mapping_response.data[i]);
-        // }
-        if( mapping_response.data[i].targetFile != ''){
+        if(mapping_response.data[i].sourceFile == this.chosenTable && mapping_response.data[i].targetFile == this.value){
           mapping_data.push(mapping_response.data[i]);
         }
+        if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile == this.chosenTable){
+          mapping_data.push(mapping_response.data[i]);
+        }
+        // if( mapping_response.data[i].targetFile != ''){
+        //   mapping_data.push(mapping_response.data[i]);
+        // }
       }
       for (var item in mapping_data) {
         var his_mapping_item = {}
