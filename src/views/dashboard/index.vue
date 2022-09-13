@@ -639,7 +639,16 @@ export default {
     this.historicalPublicMappings = JSON.parse(JSON.stringify(this.historicalPublicMappings))
     this.historicalPrivateMapping = JSON.parse(JSON.stringify(this.historicalPrivateMapping))
   },
-  activated(){
+  async activated(){
+    var getUserInfoResponse = await this.getUserInfo()
+    this.userInfo = getUserInfoResponse.data
+    await this.fetchData(this.userInfo.userId)
+    // console.log(this.privateFiles)
+    await this.getPrivateHistoricalMapping()
+    await this.getPublicHistoricalMapping()
+    //将数据转为数组以便实际操作
+    this.historicalPublicMappings = JSON.parse(JSON.stringify(this.historicalPublicMappings))
+    this.historicalPrivateMapping = JSON.parse(JSON.stringify(this.historicalPrivateMapping))
     if(this.$route.params.tab != null && this.$route.params.tab == 'second'){
       this.activeName = 'second';
       this.activeOpenName = 'second'
@@ -962,11 +971,15 @@ export default {
     },
     async fetchData(id) {
       this.listLoading = true
-      if((await getList(getToken())).data != null){
-        this.publicFiles = (await getList(getToken())).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
-      }
+      // if((await getList(getToken())).data != null){
+      //   this.publicFiles = (await getList(getToken())).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
+      // }
       if((await getListById(id)).data != null){
         this.privateFiles = (await getListById(id)).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
+      }
+      //暂时对公开文件进行调整
+      if((await getListById(id)).data != null){
+        this.publicFiles = (await getListById(id)).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
       }
       this.publicTotal = this.publicFiles.length
       this.privateTotal = this.privateFiles.length

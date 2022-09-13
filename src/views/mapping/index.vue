@@ -85,7 +85,7 @@
 
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">添加</el-button>
+              <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">应用</el-button>
               <el-button type="danger" @click="deleteHisMapping(scope.row.relation_id)" size="mini">删除</el-button>
             </template>
           </el-table-column>
@@ -177,8 +177,14 @@
         <h3>{{ currentRow3["key"] }}</h3>
         <el-form :model="form" :rules="rules" ref="ruleForm" :inline="true" size="small">
           <el-form-item label="源值" prop="key">
-            <el-select v-model="form.key" placeholder="请选择源值">
+            <!-- <el-select v-model="form.key" placeholder="请选择源值">
               <el-option v-for="(item, index) in originalSeletionData" :key="index" :label="item.enumeration" :value="item.enumeration">
+              </el-option>
+            </el-select> -->
+            <el-input v-if="!fileisMulSelection" v-model="form.key" clearable placeholder="请输入源值"></el-input>
+            <el-select v-if="fileisMulSelection" v-model="form.key" placeholder="请选择源值">
+              <el-option v-for="(item, index) in originalSeletionData" :label="item.enumeration" :value="item.enumeration"
+                :key="index">
               </el-option>
             </el-select>
           </el-form-item>
@@ -438,7 +444,7 @@ export default {
 
       rules: {
         //替换时对源值与目标值的校验规则
-        key: [], //源值
+        key: [{ required: true, message: "请输入源值", trigger: "blur" }], //源值
         value: [{ required: true, message: "请输入目标值", trigger: "blur" }], //目标值
       },
 
@@ -708,6 +714,7 @@ export default {
 
     saveMappingsInput(){
       this.mappingNameVisable = true;
+      this.mappingName = '';
     },
     //保存历史映射
     async saveMappings() {
@@ -1076,7 +1083,7 @@ export default {
               this.originalSeletionData = res.data.data;
             });
         } else {
-          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
+          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data_chosen).then((res) => {
             //根据长度限制为目标值添加校验规则
             if (res.data.data.length !== 0) {
               let obj = {};
@@ -1084,7 +1091,7 @@ export default {
               obj["max"] = res.data.data[0].lengthMax;
               obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
               obj["trigger"] = "blur";
-              this.rules.value.push(obj);
+              this.rules.key.push(obj);
             }
           });
         }

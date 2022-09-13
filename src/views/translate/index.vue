@@ -8,7 +8,7 @@
 
       <el-col :span="9">
         <div class="grid-content">
-          <h3>上传表字段</h3>
+          <h3>{{this.value}}</h3>
         </div>
       </el-col>
 
@@ -17,7 +17,7 @@
         <div class="grid-content" ></div>
       </el-col>
 
-      <el-col :span="7">
+      <!-- <el-col :span="7"> -->
         <!-- <div class="grid-content">
           <h3>
             目标字段组<template>
@@ -28,10 +28,10 @@
             </template>
           </h3>
         </div> -->
-        <div class="grid-content" >
+        <!-- <div class="grid-content" >
           <h3>{{this.value}}</h3>
         </div>
-      </el-col>
+      </el-col> -->
       <!-- <el-col :span="2">
         <div class="grid-content">
           <el-button type="primary" @click="add" style="width: 90px">关联</el-button>
@@ -42,7 +42,7 @@
           <el-button type="primary" @click="reMapSameField" style="width: 90px">同名匹配</el-button>
         </div>
       </el-col> -->
-      <el-col :span="7">
+      <!-- <el-col :span="7">
         <div class="grid-content">
           <el-button type="primary" @click="showHistoricalMapping = true" style="width: 90px">历史映射</el-button>
         </div>
@@ -75,16 +75,16 @@
 
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">添加</el-button>
+              <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">应用</el-button>
               <el-button type="danger" @click="deleteHisMapping(scope.row.relation_id)" size="mini">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
-      </el-dialog>
+      </el-dialog> -->
     </el-row>
 
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
-      <el-col :span="9">
+      <!-- <el-col :span="9">
         <div class="grid-content">
           <template>
             <el-table ref="t1" :data="table1" border highlight-current-row @current-change="handleCurrentChange1"
@@ -98,11 +98,9 @@
             </el-table>
           </template>
         </div>
-      </el-col>
+      </el-col> -->
 
-      <el-col :span="2">
-        <div class="grid-content"></div>
-      </el-col>
+      
 
       <el-col :span="9">
         <div class="grid-content">
@@ -120,8 +118,58 @@
           </template>
         </div>
       </el-col>
-    </el-row>
 
+      <el-col :span="2">
+        <div class="grid-content"></div>
+      </el-col>
+
+      <el-col :span="3">
+        <div class="grid-content">
+          <el-button type="primary" @click="showHistoricalMapping = true" style="width: 90px">历史映射</el-button>
+        </div>
+      </el-col>
+
+      <el-col :span="3">
+        <div class="grid-content">
+          <el-button type="primary" @click="showNewMapping()" style="width: 90px">新建映射</el-button>
+        </div>
+      </el-col>
+
+      <el-dialog title="历史映射信息" :visible.sync="showHistoricalMapping">
+        <el-table max-height="500" :data="historicalMapping" :row-click="clickHistoricalMapping">
+          <el-table-column type="expand">
+            <template slot-scope="props">
+              <el-form label-position="left" class="demo-table-expand">
+                <el-form-item v-for="(key, value) in props.row.map" :key="key" label="">
+                  <el-tag>{{ value }}</el-tag>
+                  ==========
+                  <el-tag>{{ key }}</el-tag>
+                  <div v-show="props.row.relation[value]">
+                    <div v-for="(rmap, rindex) in props.row.relation[value]" :key="rindex">
+                      <div v-for="(rvalue, rkey) in rmap" :key="rkey">
+                        <el-tag type="info">{{ rkey }}</el-tag><i class="el-icon-arrow-right"></i><i
+                          class="el-icon-arrow-right"></i>
+                        <el-tag type="info">{{ rvalue }}</el-tag>
+                      </div>
+                    </div>
+                  </div>
+                </el-form-item>
+              </el-form>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="目标文件" prop="name"> </el-table-column>
+
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">应用</el-button>
+              <el-button type="danger" @click="deleteHisMapping(scope.row.relation_id)" size="mini">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-dialog>
+    </el-row>
+    
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="20">
         <div class="grid-content">
@@ -440,6 +488,19 @@ export default {
   },
 
   methods: {
+    showNewMapping(){
+      this.$alert("点击新建映射后您之前的操作需要重新进行，是否新建映射？", "提示", {
+        confirmButtonText: "确定",
+          callback: (action) => {
+            if (action === "confirm") {
+              this.$router.push({
+                name: "Mapping",
+                params: {
+                tableName: this.value,
+                },
+              });
+            }}})
+    },
     async deleteHisMapping(his_mapping_id){
       await deleteHisMapping(this.userInfo.userId, this.value, his_mapping_id)
     },

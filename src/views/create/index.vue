@@ -165,16 +165,16 @@
         <el-form-item label="列名:" prop="attributename" :rules="[{ required: true, message: '列名不能为空' }]">
           <el-input v-model="editForm.attributename" placeholder="请输入列名"></el-input>
         </el-form-item>
-        <el-form-item prop="minLength" v-if="editForm.fieldType != 'enum'" label="最小长度:">
+        <el-form-item prop="minLength" v-if="editForm.fieldType == 'char'" label="最小长度:">
           <el-input v-model="editForm.minLength" placeholder="请输入该列内容最小长度"></el-input>
         </el-form-item>
-        <el-form-item prop="maxLength" v-if="editForm.fieldType != 'enum'" label="最大长度:">
+        <el-form-item prop="maxLength" v-if="editForm.fieldType == 'char'" label="最大长度:">
           <el-input v-model="editForm.maxLength" placeholder="请输入该列内容最大长度"></el-input>
         </el-form-item>
-        <el-form-item prop="minLength" v-if="tableForm.fieldType == 'float'" label="最小值:">
+        <el-form-item prop="minLength" v-if="editForm.fieldType == 'float'" label="最小值:">
           <el-input v-model="editForm.minLength" placeholder="请输入该列内容最小值"></el-input>
         </el-form-item>
-        <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'float'" label="最大值:">
+        <el-form-item prop="maxLength" v-if="editForm.fieldType == 'float'" label="最大值:">
           <el-input v-model="editForm.maxLength" placeholder="请输入该列内容最大值"></el-input>
         </el-form-item>
         <div style="" v-if="editForm.fieldType == 'enum' && keys.includes(editForm.attributename)">
@@ -237,6 +237,7 @@ export default {
     var checkEnumeration = (rule, value, callback) => {
 
     };
+    //检查min max 数值本身
     var checkLengthForEdit = (rule, value, callback) => {
       console.log("check")
       if (!value && value != 0) {
@@ -256,7 +257,7 @@ export default {
               } else {
                 if (this.editForm.minLength != "" && this.editForm.maxLength != "") {
                   if (parseFloat(this.editForm.minLength) > parseFloat(this.editForm.maxLength)) {
-                    callback(new Error('最大值不能小于最小值'))
+                    callback(new Error('最大长度不能小于最小长度'))
                   } else {
                     callback()
                   }
@@ -299,7 +300,7 @@ export default {
               } else {
                 if (this.tableForm.minLength != "" && this.tableForm.maxLength != "") {
                   if (parseFloat(this.tableForm.minLength) > parseFloat(this.tableForm.maxLength)) {
-                    callback(new Error('最大值不能小于最小值'))
+                    callback(new Error('最大长度不能小于最小长度'))
                   } else {
                     callback()
                   }
@@ -450,6 +451,7 @@ export default {
 
   },
   methods: {
+    //设置文件示例值（总体） --> 自动建表使用
     getSampleSet() {
       this.sampleSet = {}
       for (let i = 0; i < this.keys.length; i++) { // 初始化
@@ -465,6 +467,7 @@ export default {
       }
       console.log(this.sampleSet)
     },
+    //设置字段示例值（原子） --> 自动建表使用
     getDefaultItem(columnName) {
       let current_field = {}
       let _sample = ""
@@ -505,7 +508,7 @@ export default {
       limit['tableName'] = this.tableHeader.dataname
       limit['columnName'] = columnName
 
-      limit['tokenEnume'] = "false"
+      limit['tokenEnume'] = "char"
       limit['itemEnume'] = "null"
       limit['lengthMin'] = 0
       limit['lengthMax'] = 255
@@ -571,6 +574,28 @@ export default {
           });
           return;
         }
+        
+
+        // 若是字符类，则判断示范数据长度是否符合约束
+        if (this.editForm.fieldType == "char" && (this.editForm.sample.length < this.editForm.minLength
+         || this.editForm.sample.length > this.editForm.maxLength)) {
+          this.$notify.error({
+            title: '错误',
+            message: '示范数据必须在约束范围内'
+          });
+          return;
+        }
+
+        // 若是数字类，则判断示范数据大小是否符合约束
+        if (this.editForm.fieldType == "float" && (Number.isNaN(parseFloat(this.editForm.sample)) || (parseFloat(this.editForm.sample) < parseFloat(this.editForm.minLength)
+         || parseFloat(this.editForm.sample) > parseFloat(this.editForm.maxLength)))) {
+          this.$notify.error({
+            title: '错误',
+            message: '示范数据必须在约束范围内且必须为数字'
+          });
+          return;
+        }
+
 
         // 建表
         this.tableData[this.selectedRowIndex]["attributename"] = this.editForm.attributename;
@@ -579,7 +604,7 @@ export default {
           this.tableData[this.selectedRowIndex]["fieldType"] = "char"
           this.tableData[this.selectedRowIndex]["lengthLimit"] = 255;
         } else if (this.editForm.fieldType == "float") {
-          this.tableData[this.selectedRowIndex]["lengthLimit"] = parseInt(this.editForm.maxLength);
+          this.tableData[this.selectedRowIndex]["lengthLimit"] = 24;
         } else {
           this.tableData[this.selectedRowIndex]["lengthLimit"] = parseInt(this.editForm.maxLength);
         }
@@ -612,15 +637,15 @@ export default {
           })
           this.limitations[this.selectedRowIndex]['itemEnume'] = itemEnumeList
         } else if (this.editForm.fieldType == "char") {
-          this.limitations[this.selectedRowIndex]['tokenEnume'] = "false"
+          this.limitations[this.selectedRowIndex]['tokenEnume'] = "char"
           this.limitations[this.selectedRowIndex]['itemEnume'] = "null"
           this.limitations[this.selectedRowIndex]['lengthMin'] = parseInt(this.editForm.minLength)
           this.limitations[this.selectedRowIndex]['lengthMax'] = parseInt(this.editForm.maxLength)
         } else {   //lengthMin暂定为大小约束
           this.limitations[this.selectedRowIndex]['tokenEnume'] = "float"
           this.limitations[this.selectedRowIndex]['itemEnume'] = "null"
-          this.limitations[this.selectedRowIndex]['lengthMin'] = parseInt(this.editForm.minLength)
-          this.limitations[this.selectedRowIndex]['lengthMax'] = parseInt(this.editForm.maxLength)
+          this.limitations[this.selectedRowIndex]['lengthMin'] = parseFloat(this.editForm.minLength)
+          this.limitations[this.selectedRowIndex]['lengthMax'] = parseFloat(this.editForm.maxLength)
         }
 
         // 示范数据
@@ -713,15 +738,15 @@ export default {
       this.samples.splice(index, 1);
       this.tableFormList.splice(index, 1);
     },
-    clearIntLimitation() {// 在最终上传时，int类型没有约束
-      let deleted_int_limitations = []
-      for (let i = 0; i < this.limitations.length; i++) {
-        if (this.limitations[i]['tokenEnume'] != "float") {
-          deleted_int_limitations.push(this.limitations[i])
-        }
-      }
-      this.limitations = deleted_int_limitations;
-    },
+    // clearIntLimitation() {// 在最终上传时，int类型没有约束
+    //   let deleted_int_limitations = []
+    //   for (let i = 0; i < this.limitations.length; i++) {
+    //     if (this.limitations[i]['tokenEnume'] != "float") {
+    //       deleted_int_limitations.push(this.limitations[i])
+    //     }
+    //   }
+    //   this.limitations = deleted_int_limitations;
+    // },
     async upload() {
       let a = {};
       a["tableName"] = this.tableHeader.dataname;
@@ -741,8 +766,8 @@ export default {
         return;
       }
 
-      // 建立表的约束
-      this.clearIntLimitation() // 首先删除int的约束，此约束无用
+      // // 建立表的约束
+      // this.clearIntLimitation() // 首先删除int的约束，此约束无用
 
       try {
         var limits_response = await limits(this.limitations)
@@ -834,10 +859,11 @@ export default {
         });
         return;
       }
-      if (this.tableForm.fieldType == "float" && isNaN(this.tableForm.sample)) {
+      if (this.tableForm.fieldType == "float" && (Number.isNaN(parseFloat(this.tableForm.sample)) || (parseFloat(this.tableForm.sample) < parseFloat(this.tableForm.minLength)
+         || parseFloat(this.tableForm.sample) > parseFloat(this.tableForm.maxLength)))) {
         this.$notify.error({
           title: '错误',
-          message: '示范数据必须为数字类型'
+          message: '示范数据必须为数字类型且在约束范围内'
         });
         return;
       }
@@ -909,11 +935,11 @@ export default {
         }
 
         // 若是数字类，则判断示范数据大小是否符合约束
-        if (this.tableForm.fieldType == "float" && (parseInt(this.tableForm.sample) < this.tableForm.minLength 
-         || this.tableForm.sample.length > this.tableForm.maxLength)) {
+        if (this.tableForm.fieldType == "float" && (Number.isNaN(parseFloat(this.tableForm.sample)) || (parseFloat(this.tableForm.sample) < parseFloat(this.tableForm.minLength)
+         || parseFloat(this.tableForm.sample) > parseFloat(this.tableForm.maxLength)))) {
           this.$notify.error({
             title: '错误',
-            message: '示范数据必须在约束范围内'
+            message: '示范数据必须在约束范围内且必须为数字'
           });
           return;
         }
@@ -986,13 +1012,16 @@ export default {
           limit['itemEnume'] = itemEnumeList
           this.limitations.push(limit)
         } else if (this.tableForm.fieldType == "char") {
-          limit['tokenEnume'] = "false"
+          limit['tokenEnume'] = "char"
           limit['itemEnume'] = "null"
           limit['lengthMin'] = parseInt(this.tableForm.minLength)
           limit['lengthMax'] = parseInt(this.tableForm.maxLength)
           this.limitations.push(limit)
-        } else {   // double 暂时不写
+        } else {   // double 
           limit['tokenEnume'] = "float"
+          limit['itemEnume'] = "null"
+          limit['lengthMin'] = parseFloat(this.tableForm.minLength)
+          limit['lengthMax'] = parseFloat(this.tableForm.maxLength)
           this.limitations.push(limit)
         }
 
