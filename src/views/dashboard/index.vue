@@ -16,7 +16,7 @@
                   placeholder="请输入文件名/文件描述/创建单位/创建时间进行查找"></el-input>
               </div>
 
-              <el-table :data="NewPriitems" element-loading-text="Loading" border stripe fit highlight-current-row>
+              <el-table :data="NewPriitems" element-loading-text="Loading" border stripe fit highlight-current-row @sort-change="changeSortPri"> 
                 <el-table-column align="center" label="唯一标识" width="95">
                   <template slot-scope="scope">
                     {{ scope.row.gTableidentification }}
@@ -111,12 +111,9 @@
           </el-tab-pane>
           <el-tab-pane name="second">
             <span slot="label" class="tableTitleClass">映射</span>
-            <el-table :data="MapPriitems" row-key="id" style="width: 100%"
-            :default-sort="{prop:'timestamp',order:'descending'}">
-              <el-table-column label="ID" width="95" align="center">
-                <template slot-scope="scope">
-                  {{ scope.$index + 1 }}
-                </template>
+            <el-table :data="NewMapItemPri" row-key="id" style="width: 100%"
+            @sort-change="changeSortMapPri">
+              <el-table-column label="ID" width="95" align="center" prop="id">
               </el-table-column>
               <el-table-column label="映射名称" prop="mappingName" align="center">
               </el-table-column>
@@ -165,7 +162,7 @@
                   placeholder="请输入文件名/文件描述/创建单位/创建时间进行查找"></el-input>
               </div>
 
-              <el-table :data="NewPubitems" element-loading-text="Loading" border stripe fit highlight-current-row>
+              <el-table :data="NewPubitems" element-loading-text="Loading" border stripe fit highlight-current-row @sort-change="changeSortPub">
                 <el-table-column align="center" label="唯一标识" width="95">
                   <template slot-scope="scope">
                     {{ scope.row.gTableidentification }}
@@ -260,10 +257,11 @@
           </el-tab-pane>
 
           <el-tab-pane name="second">
-            <span slot="label" class="tableTitleClass">映射</span>            <el-button disabled style="margin-top: 10px" @click="upLoadMapping">导入映射文件</el-button>
-            <el-table :data="MapPubitems" row-key="id" :expand-row-keys="publicExpands"
+            <span slot="label" class="tableTitleClass">映射</span>           
+            <el-button disabled style="margin-top: 10px" @click="upLoadMapping">导入映射文件</el-button>
+            <el-table :data="NewMapItemPub" row-key="id" :expand-row-keys="publicExpands"
               style="width: 100%" @expand-change="expandPublicChange"
-              :default-sort="{prop:'timestamp',order:'descending'}">
+              @sort-change="changeSortMapPub">
               <el-table-column type="expand">
                 <template slot-scope="props">
                   <el-table :data="props.row.info" style="width: 100%" row-key="sourceField" highlight-current-row
@@ -278,10 +276,7 @@
                 </template>
               </el-table-column>
               
-              <el-table-column label="ID" width="95" align="center">
-                <template slot-scope="scope">
-                  {{ scope.$index + 1 }}
-                </template>
+              <el-table-column label="ID" width="95" align="center" prop="id">
               </el-table-column>
               <el-table-column label="映射名称" prop="mappingName" align="center">
               </el-table-column>
@@ -339,6 +334,8 @@ import { getList, getListById } from '@/api/table'
 import { getToken } from '@/utils/auth'
 import { deleteHisMapping, getPublicMappings, getPrivateMappings } from '@/api/mapping'
 import Axios from "axios";
+import { create } from 'domain';
+import _ from 'lodash';
 export default {
   filters: {
     statusFilter(status) {
@@ -562,7 +559,6 @@ export default {
     NewPriitems() {
       var _this = this;
       var NewPriitems = [];
-      console.log(this.privateFiles)
       if (this.privateFiles != null && this.privateFiles != false) {
         _this.privateFiles.map(function (item) {
           if (
@@ -600,36 +596,36 @@ export default {
       this.privateTotal = NewPubitems.length
       return NewPubitems.slice((this.publicPage - 1) * this.p2Size, this.publicPage * this.p2Size);
     },
-    MapPubitems() {
+    NewMapItemPub() {
       var _this = this;
-      var MapPubitems = [];
-      if (this.historicalPublicMappingsTemp != null && this.historicalPublicMappingsTemp != false) {
-        _this.historicalPublicMappingsTemp.map(function (item) {
+      var NewMapItemPub = [];
+      if (this.historicalPublicMappings != null && this.historicalPublicMappings != false) {
+        _this.historicalPublicMappings.map(function (item) {
           if (
             item.mappingName.search(_this.mappingSearchInputPub) != -1
           ) {
-            MapPubitems.push(item);
+            NewMapItemPub.push(item);
           }
         });
       }
-      this.MappingpublicTotal = MapPubitems.length
-      return MapPubitems.slice((this.MappingpublicPage - 1) * this.p2Size, this.MappingpublicPage * this.p2Size);
+      this.MappingpublicTotal = NewMapItemPub.length
+      return NewMapItemPub.slice((this.MappingpublicPage - 1) * this.p2Size, this.MappingpublicPage * this.p2Size);
     },
-    MapPriitems() {
+    NewMapItemPri() {
       var _this = this;
-      var MapPriitems = [];
-      if (this.historicalPrivateMappingTemp != null && this.historicalPrivateMappingTemp != false) {
-        _this.historicalPrivateMappingTemp.map(function (item) {
+      var NewMapItemPri = [];
+      if (this.historicalPrivateMapping != null && this.historicalPrivateMapping != false) {
+        _this.historicalPrivateMapping.map(function (item) {
           if (
             // item.id.search(_this.searchData) != -1 ||
             item.mappingName.search(_this.mappingSearchInputPri) != -1
           ) {
-            MapPriitems.push(item);
+            NewMapItemPri.push(item);
           }
         });
       }
-      this.MappingprivateTotal = MapPriitems.length
-      return MapPriitems.slice((this.MappingprivatePage - 1) * this.p2Size, this.MappingprivatePage * this.p2Size);
+      this.MappingprivateTotal = NewMapItemPri.length;
+      return NewMapItemPri.slice((this.MappingprivatePage - 1) * this.p2Size, this.MappingprivatePage * this.p2Size);
     }
   },
   async created() {
@@ -639,8 +635,106 @@ export default {
     // console.log(this.privateFiles)
     await this.getPrivateHistoricalMapping()
     await this.getPublicHistoricalMapping()
+    //将数据转为数组以便实际操作
+    this.historicalPublicMappings = JSON.parse(JSON.stringify(this.historicalPublicMappings))
+    this.historicalPrivateMapping = JSON.parse(JSON.stringify(this.historicalPrivateMapping))
+  },
+  activated(){
+    if(this.$route.params.tab != null && this.$route.params.tab == 'second'){
+      this.activeName = 'second';
+      this.activeOpenName = 'second'
+    }else{
+      this.activeName = 'first';
+      this.activeOpenName = 'first'
+    }
   },
   methods: {
+    //时间跨页排序
+    changeSortPri(val){
+      if(this.privateFiles != null){
+        let sortData=_.cloneDeep(this.privateFiles)
+        if(val.order==="descending"){
+          if(val.prop==="gTableTime"){
+            // console.log(val.prop)
+            sortData.sort(this.sortKeys(val.prop,true))
+            // console.log(sortData)
+          }
+        }else{
+          if(val.prop==="gTableTime"){
+            sortData.sort(this.sortKeys(val.prop,false))
+          }
+        }
+        this.privateFiles = sortData;
+        // this.currentPage=1
+      }
+    },
+    changeSortPub(val){
+      if(this.publicFiles != null){
+        let sortData=_.cloneDeep(this.publicFiles)
+        if(val.order==="descending"){
+          if(val.prop==="gTableTime"){
+            // console.log(val.prop)
+            sortData.sort(this.sortKeys(val.prop,true))
+            // console.log(sortData)
+          }
+        }else{
+          if(val.prop==="gTableTime"){
+            sortData.sort(this.sortKeys(val.prop,false))
+          }
+        }
+        this.publicFiles = sortData;
+        // this.currentPage=1
+      }
+    },
+    changeSortMapPri(val){
+      if(this.historicalPrivateMapping != null){
+        let sortData=_.cloneDeep(this.historicalPrivateMapping)
+        if(val.order==="descending"){
+          if(val.prop==="timestamp"){
+            // console.log(val.prop)
+            sortData.sort(this.sortKeys(val.prop,true))
+            // console.log(sortData)
+          }
+        }else{
+          if(val.prop==="timestamp"){
+            sortData.sort(this.sortKeys(val.prop,false))
+          }
+        }
+        this.historicalPrivateMapping = sortData;
+        // this.currentPage=1
+      }
+    },
+    changeSortMapPub(val){
+      if(this.historicalPublicMappings != null){
+        let sortData=_.cloneDeep(this.historicalPublicMappings)
+        if(val.order==="descending"){
+          if(val.prop==="timestamp"){
+            // console.log(val.prop)
+            sortData.sort(this.sortKeys(val.prop,true))
+            // console.log(sortData)
+          }
+        }else{
+          if(val.prop==="timestamp"){
+            sortData.sort(this.sortKeys(val.prop,false))
+          }
+        }
+        this.historicalPublicMappings = sortData;
+        // this.currentPage=1
+      }
+    },
+    // 升序降序
+    sortKeys(key,order){
+      if(order){
+        return (val1,val2)=>{
+          return val2[key] > val1[key] ? 1 : -1
+        }
+      }else{
+        return (val1,val2)=>{
+          return val2[key] < val1[key] ? 1 : -1
+        }
+      }
+    },
+    
     // 获取公开历史映射，并将数据进行转换
     async getPublicHistoricalMapping() {
       var get_private_mapping_response = this.historicalPrivateMapping;
@@ -690,7 +784,6 @@ export default {
         this.historicalPrivateMapping[i]=get_private_mapping_response[privatelength-i-1]
       }
       this.MappingprivateTotal = this.historicalPrivateMapping.length
-      console.log(this.MappingprivateTotal)
       this.historicalPrivateMappingTemp = this.historicalPrivateMapping.slice((this.MappingprivatePage - 1) * this.p2Size, this.MappingprivatePage * this.p2Size,)
     },
     // 关闭后清空数据
@@ -743,13 +836,14 @@ export default {
       if (r == true) {
         let delete_response = await deleteHisMapping(row.id, this.userInfo.userId);
         this.historicalPublicMappingsTemp.splice(index, 1)
+        this.getPublicHistoricalMapping();
       }
     },
     async handleDeletePrivateMapping(index, row) {
       var r = confirm("是否删除");
       if (r == true) {
         let delete_response = await deleteHisMapping(row.id, this.userInfo.userId);
-        this.historicalPrivateMappingTemp.splice(index, 1)
+        this.getPrivateHistoricalMapping();
       }
     },
     // 更换个人文件的标签页

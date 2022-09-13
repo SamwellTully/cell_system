@@ -30,11 +30,17 @@
         <el-form-item label="列名:" prop="attributename" :rules="[{ required: true, message: '列名不能为空' }]">
           <el-input v-model="tableForm.attributename" placeholder="请输入列名"></el-input>
         </el-form-item>
-        <el-form-item prop="minLength" v-if="tableForm.fieldType != 'enum'" label="最小长度:">
+        <el-form-item prop="minLength" v-if="tableForm.fieldType == 'char'" label="最小长度:">
           <el-input v-model="tableForm.minLength" placeholder="请输入该列内容最小长度"></el-input>
         </el-form-item>
-        <el-form-item prop="maxLength" v-if="tableForm.fieldType != 'enum'" label="最大长度:">
+        <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'char'" label="最大长度:">
           <el-input v-model="tableForm.maxLength" placeholder="请输入该列内容最大长度"></el-input>
+        </el-form-item>
+        <el-form-item prop="minLength" v-if="tableForm.fieldType == 'float'" label="最小值:">
+          <el-input v-model="tableForm.minLength" placeholder="请输入该列内容最小值"></el-input>
+        </el-form-item>
+        <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'float'" label="最大值:">
+          <el-input v-model="tableForm.maxLength" placeholder="请输入该列内容最大值"></el-input>
         </el-form-item>
         <div style="" v-if="tableForm.fieldType == 'enum'">
           <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" v-for="(v, index) in tableForm.enumeration"
@@ -164,6 +170,12 @@
         </el-form-item>
         <el-form-item prop="maxLength" v-if="editForm.fieldType != 'enum'" label="最大长度:">
           <el-input v-model="editForm.maxLength" placeholder="请输入该列内容最大长度"></el-input>
+        </el-form-item>
+        <el-form-item prop="minLength" v-if="tableForm.fieldType == 'float'" label="最小值:">
+          <el-input v-model="editForm.minLength" placeholder="请输入该列内容最小值"></el-input>
+        </el-form-item>
+        <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'float'" label="最大值:">
+          <el-input v-model="editForm.maxLength" placeholder="请输入该列内容最大值"></el-input>
         </el-form-item>
         <div style="" v-if="editForm.fieldType == 'enum' && keys.includes(editForm.attributename)">
           <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" label="枚举项:">
@@ -560,7 +572,6 @@ export default {
           return;
         }
 
-        console.log("edit ------ ")
         // 建表
         this.tableData[this.selectedRowIndex]["attributename"] = this.editForm.attributename;
         this.tableData[this.selectedRowIndex]["fieldType"] = this.editForm.fieldType;
@@ -568,7 +579,7 @@ export default {
           this.tableData[this.selectedRowIndex]["fieldType"] = "char"
           this.tableData[this.selectedRowIndex]["lengthLimit"] = 255;
         } else if (this.editForm.fieldType == "float") {
-          this.tableData[this.selectedRowIndex]["lengthLimit"] = 24;
+          this.tableData[this.selectedRowIndex]["lengthLimit"] = parseInt(this.editForm.maxLength);
         } else {
           this.tableData[this.selectedRowIndex]["lengthLimit"] = parseInt(this.editForm.maxLength);
         }
@@ -605,8 +616,11 @@ export default {
           this.limitations[this.selectedRowIndex]['itemEnume'] = "null"
           this.limitations[this.selectedRowIndex]['lengthMin'] = parseInt(this.editForm.minLength)
           this.limitations[this.selectedRowIndex]['lengthMax'] = parseInt(this.editForm.maxLength)
-        } else {   // double 暂时不写
+        } else {   //lengthMin暂定为大小约束
           this.limitations[this.selectedRowIndex]['tokenEnume'] = "float"
+          this.limitations[this.selectedRowIndex]['itemEnume'] = "null"
+          this.limitations[this.selectedRowIndex]['lengthMin'] = parseInt(this.editForm.minLength)
+          this.limitations[this.selectedRowIndex]['lengthMax'] = parseInt(this.editForm.maxLength)
         }
 
         // 示范数据
@@ -880,6 +894,26 @@ export default {
           this.$notify.error({
             title: '错误',
             message: '示范数据必须为枚举项'
+          });
+          return;
+        }
+
+        // 若是字符类，则判断示范数据长度是否符合约束
+        if (this.tableForm.fieldType == "char" && (this.tableForm.sample.length < this.tableForm.minLength
+         || this.tableForm.sample.length > this.tableForm.maxLength)) {
+          this.$notify.error({
+            title: '错误',
+            message: '示范数据必须在约束范围内'
+          });
+          return;
+        }
+
+        // 若是数字类，则判断示范数据大小是否符合约束
+        if (this.tableForm.fieldType == "float" && (parseInt(this.tableForm.sample) < this.tableForm.minLength 
+         || this.tableForm.sample.length > this.tableForm.maxLength)) {
+          this.$notify.error({
+            title: '错误',
+            message: '示范数据必须在约束范围内'
           });
           return;
         }

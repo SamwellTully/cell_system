@@ -16,7 +16,7 @@
         <div class="grid-content">
           <h3>
             目标文件<template>
-              <el-select v-model="value" @change="handleSelectChange" style="margin-left: 10px" filterable="true">
+              <el-select v-model="value" @change="handleSelectChange" style="margin-left: 10px" filterable>
                 <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
@@ -81,7 +81,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="目标表" prop="name"> </el-table-column>
+          <el-table-column label="目标文件" prop="name"> </el-table-column>
 
           <el-table-column label="操作">
             <template slot-scope="scope">
@@ -178,7 +178,7 @@
         <el-form :model="form" :rules="rules" ref="ruleForm" :inline="true" size="small">
           <el-form-item label="源值" prop="key">
             <el-select v-model="form.key" placeholder="请选择源值">
-              <el-option v-for="(item, index) in originalSeletionData" :key="index" :label="item" :value="item">
+              <el-option v-for="(item, index) in originalSeletionData" :key="index" :label="item.enumeration" :value="item.enumeration">
               </el-option>
             </el-select>
           </el-form-item>
@@ -445,6 +445,7 @@ export default {
       fileOriginalData: null, //获取上传文件的json数据
       fileSeletionData: {}, //保存遍历文件得到的各字段的所有源值取值，用于源值的多选框
       originalSeletionData: [], //点击替换按钮时，该行字段的源值多选框数据
+      fileisMulSelection: false,
 
       expands: [], //控制已关联字段的单次展开
       getRowKeys(row) {
@@ -646,55 +647,63 @@ export default {
 
     //设置历史映射
     setMapping(map, relation_map) {
-      this.table3 = [];
-      this.replaceField = [];
+      this.$alert("确认使用该历史映射？","提示",{
+        confirmButtonText:"确定",
+        callback:(action) =>{
+          if(action === "confirm"){
+            this.table3 = [];
+            this.replaceField = [];
 
-      this.resetTabele(this.table1);
-      this.resetTabele(this.table2);
+            this.resetTabele(this.table1);
+            this.resetTabele(this.table2);
 
-      for (const key in map) {
-        console.info(key);
-        console.info(map[key]);
-        if (relation_map[key] != null) { // 添加替换关系
-          console.log("内容替换的内容")
-          console.log(relation_map[key])
-          for (var i = 0; i < relation_map[key].length; i++) {
-            console.log(i)
-            console.log(relation_map[key][i])
-            for (var relation_key in relation_map[key][i]) {
-              console.log("relation_key")
-              console.log(relation_key)
-              var replace_item_info = {};
-              replace_item_info['originalField'] = key
-              replace_item_info['targetField'] = map[key]
-              replace_item_info['originalValue'] = relation_key
-              replace_item_info['targetValue'] = relation_map[key][i][relation_key]
-              this.replaceField.push(replace_item_info)
-              console.log(replace_item_info)
+            for (const key in map) {
+              console.info(key);
+              console.info(map[key]);
+              if (relation_map[key] != null) { // 添加替换关系
+                console.log("内容替换的内容")
+                console.log(relation_map[key])
+                for (var i = 0; i < relation_map[key].length; i++) {
+                  console.log(i)
+                  console.log(relation_map[key][i])
+                  for (var relation_key in relation_map[key][i]) {
+                    console.log("relation_key")
+                    console.log(relation_key)
+                    var replace_item_info = {};
+                    replace_item_info['originalField'] = key
+                    replace_item_info['targetField'] = map[key]
+                    replace_item_info['originalValue'] = relation_key
+                    replace_item_info['targetValue'] = relation_map[key][i][relation_key]
+                    this.replaceField.push(replace_item_info)
+                    console.log(replace_item_info)
+                  }
+
+                }
+              }
+              for (let i = 0; i < this.table1.length; i++) {
+                if (this.table1[i]["key"] === key) {
+                  this.table1[i]["flag"] = 1;
+                }
+              }
+
+              for (let i = 0; i < this.table2.length; i++) {
+                if (this.table2[i]["key"] === map[key]) {
+                  this.table2[i]["flag"] = 1;
+                }
+              }
+
+              let obj = {};
+              obj.key = key;
+              obj.value = map[key];
+              this.table3.push(obj);
+
             }
 
+            this.refdata();
+            this.showHistoricalMapping = false;
           }
         }
-        for (let i = 0; i < this.table1.length; i++) {
-          if (this.table1[i]["key"] === key) {
-            this.table1[i]["flag"] = 1;
-          }
-        }
-
-        for (let i = 0; i < this.table2.length; i++) {
-          if (this.table2[i]["key"] === map[key]) {
-            this.table2[i]["flag"] = 1;
-          }
-        }
-
-        let obj = {};
-        obj.key = key;
-        obj.value = map[key];
-        this.table3.push(obj);
-
-      }
-
-      this.refdata();
+      })
     },
 
     saveMappingsInput(){
@@ -735,6 +744,10 @@ export default {
               if (action === "confirm") {
                 this.$router.push({
                   name: "Dashboard",
+                  params: {
+                    tab: "second", 
+                    //跳转至映射
+              },
                 });
               }
              },
@@ -766,6 +779,7 @@ export default {
 
     //对文件中字段与目标字段组中相同的字段进行关联，增加标识位，保证已关联字段无法选中
     addFlag() {
+      this.table3 = [];
       if (this.table1.length != 0 && this.table2.length != 0) {
         for (let i = 0; i < this.table1.length; i++) {
           for (let j = 0; j < this.table2.length; j++) {
@@ -788,6 +802,7 @@ export default {
       }
       //刷新
       this.refdata();
+      this.resetTabele(this.table3)
     },
 
     isContains(key) {
@@ -1041,11 +1056,39 @@ export default {
         this.$refs["ruleForm"].resetFields();
       }
       this.rules.value.splice(1, 1);
-      this.originalSeletionData = this.fileSeletionData[row.key];
+      // this.originalSeletionData = this.fileSeletionData[row.key]; 取值方式修改
 
       //是否为空
       // this.rules.key.push({ required: true, message: "请输入源值", trigger: "blur" });
       // this.rules.value =
+      let data_chosen = new FormData();
+      data_chosen.append("tableName", this.chosenTable);
+      data_chosen.append("columnName", row.key);
+      //判断该字段是否为枚举项
+      this.$http.post("http://8.134.49.56:8000/G/IsNotEnume", data_chosen).then((res) => {
+        this.fileisMulSelection = res.data;
+
+        if (res.data) {
+          //获取枚举项项数据
+          this.$http
+            .post("http://8.134.49.56:8000/G/IsNotEnumeData", data_chosen)
+            .then((res) => {
+              this.originalSeletionData = res.data.data;
+            });
+        } else {
+          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
+            //根据长度限制为目标值添加校验规则
+            if (res.data.data.length !== 0) {
+              let obj = {};
+              obj["min"] = res.data.data[0].lengthMin;
+              obj["max"] = res.data.data[0].lengthMax;
+              obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
+              obj["trigger"] = "blur";
+              this.rules.value.push(obj);
+            }
+          });
+        }
+      });
 
       let data = new FormData();
       data.append("tableName", this.value);
@@ -1077,23 +1120,24 @@ export default {
         }
       });
 
-      let obj1 = {};
+      //字符处理待定
+      // let obj1 = {};
 
-      for (let i = 0; i < this.table3.length; i++) {
-        obj1[this.table3[i]["key"]] = this.table3[i]["value"];
-      }
+      // for (let i = 0; i < this.table3.length; i++) {
+      //   obj1[this.table3[i]["key"]] = this.table3[i]["value"];
+      // }
 
-      let data2 = new FormData();
-      data2.append("file", this.file);
-      data2.append("columnName", row.value);
-      data2.append("relationString", JSON.stringify(obj1));
+      // let data2 = new FormData();
+      // data2.append("file", this.file);
+      // data2.append("columnName", row.value);
+      // data2.append("relationString", JSON.stringify(obj1));
 
-      this.$http.post("http://8.134.49.56:8000/G/listUnit", data2).then((res) => {
-        if (res.data.data.length > 0) {
-          this.isWithUnit = true;
-          this.unitData = res.data.data;
-        }
-      });
+      // this.$http.post("http://8.134.49.56:8000/G/listUnit", data2).then((res) => {
+      //   if (res.data.data.length > 0) {
+      //     this.isWithUnit = true;
+      //     this.unitData = res.data.data;
+      //   }
+      // });
     },
 
     //单行字段的内容替换
@@ -1198,6 +1242,8 @@ export default {
     //获取数据库中的所有表名
     getDatabase() {
       this.$http.get("http://8.134.49.56:8000/G/getdatabase").then((res) => {
+        this.options = [];
+        this.database = [];
         for (var i = 0; i < res.data.length; i++) {
           let obj = {};
           obj.value = res.data[i]["Generaltable_name"];
@@ -1239,20 +1285,22 @@ export default {
 
     //保存遍历文件得到的各字段的所有源值取值，用于源值的多选框
     getFileSeletionData() {
-      let obj = {};
+      if(this.originalField != null){
+        let obj = {};
 
-      for (let i = 0; i < this.originalField.length; i++) {
-        obj[this.originalField[i]["key"]] = [];
-        for (let j = 0; j < this.fileOriginalData.length; j++) {
-          obj[this.originalField[i]["key"]].push(
-            this.fileOriginalData[j][this.originalField[i]["key"]]
-          );
+        for (let i = 0; i < this.originalField.length; i++) {
+          obj[this.originalField[i]["key"]] = [];
+          for (let j = 0; j < this.fileOriginalData.length; j++) {
+            obj[this.originalField[i]["key"]].push(
+              this.fileOriginalData[j][this.originalField[i]["key"]]
+            );
+          }
+          obj[this.originalField[i]["key"]] = [
+            ...new Set(obj[this.originalField[i]["key"]]),
+          ];
         }
-        obj[this.originalField[i]["key"]] = [
-          ...new Set(obj[this.originalField[i]["key"]]),
-        ];
+        this.fileSeletionData = obj;
       }
-      this.fileSeletionData = obj;
     },
   },
 };

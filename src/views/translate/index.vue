@@ -32,7 +32,7 @@
           <h3>{{this.value}}</h3>
         </div>
       </el-col>
-      <el-col :span="2">
+      <!-- <el-col :span="2">
         <div class="grid-content">
           <el-button type="primary" @click="add" style="width: 90px">关联</el-button>
         </div>
@@ -41,8 +41,8 @@
         <div class="grid-content">
           <el-button type="primary" @click="reMapSameField" style="width: 90px">同名匹配</el-button>
         </div>
-      </el-col>
-      <el-col :span="2">
+      </el-col> -->
+      <el-col :span="7">
         <div class="grid-content">
           <el-button type="primary" @click="showHistoricalMapping = true" style="width: 90px">历史映射</el-button>
         </div>
@@ -131,15 +131,15 @@
               @expand-change="expandSelect">
               <el-table-column prop="key" label="源字段"> </el-table-column>
               <el-table-column prop="value" label="目的字段"> </el-table-column>
-              <el-table-column label="操作">
+              <!-- <el-table-column label="操作">
                 <template slot-scope="scope">
                   <el-button @click="clickbtn(scope.row)" size="mini" style="margin-right: 50px">替换</el-button>
                   <el-button @click.native.prevent="deleteRow(scope.$index, table3)" size="mini" type="danger">
                     移除
                   </el-button>
                 </template>
-              </el-table-column>
-              <el-table-column type="expand">
+              </el-table-column> -->
+              <!-- <el-table-column type="expand">
                 <template slot-scope="props">
                   <el-card shadow="always">
                     <el-table :data="matchingValue" border style="width: 100%" :cell-style="{ background: '#FFFFFF' }">
@@ -155,7 +155,7 @@
                     </el-table>
                   </el-card>
                 </template>
-              </el-table-column>
+              </el-table-column> -->
             </el-table>
           </template>
         </div>
@@ -516,55 +516,63 @@ export default {
 
     //设置历史映射
     setMapping(map, relation_map) {
-      this.table3 = [];
-      this.replaceField = [];
+      this.$alert("确认使用该历史映射？","提示",{
+        confirmButtonText:"确定",
+        callback:(action) =>{
+          if(action === "confirm"){
+            this.table3 = [];
+            this.replaceField = [];
 
-      this.resetTabele(this.table1);
-      this.resetTabele(this.table2);
+            this.resetTabele(this.table1);
+            this.resetTabele(this.table2);
 
-      for (const key in map) {
-        console.info(key);
-        console.info(map[key]);
-        if (relation_map[key] != null) { // 添加替换关系
-          console.log("内容替换的内容")
-          console.log(relation_map[key])
-          for (var i = 0; i < relation_map[key].length; i++) {
-            console.log(i)
-            console.log(relation_map[key][i])
-            for (var relation_key in relation_map[key][i]) {
-              console.log("relation_key")
-              console.log(relation_key)
-              var replace_item_info = {};
-              replace_item_info['originalField'] = key
-              replace_item_info['targetField'] = map[key]
-              replace_item_info['originalValue'] = relation_key
-              replace_item_info['targetValue'] = relation_map[key][i][relation_key]
-              this.replaceField.push(replace_item_info)
-              console.log(replace_item_info)
+            for (const key in map) {
+              console.info(key);
+              console.info(map[key]);
+              if (relation_map[key] != null) { // 添加替换关系
+                console.log("内容替换的内容")
+                console.log(relation_map[key])
+                for (var i = 0; i < relation_map[key].length; i++) {
+                  console.log(i)
+                  console.log(relation_map[key][i])
+                  for (var relation_key in relation_map[key][i]) {
+                    console.log("relation_key")
+                    console.log(relation_key)
+                    var replace_item_info = {};
+                    replace_item_info['originalField'] = key
+                    replace_item_info['targetField'] = map[key]
+                    replace_item_info['originalValue'] = relation_key
+                    replace_item_info['targetValue'] = relation_map[key][i][relation_key]
+                    this.replaceField.push(replace_item_info)
+                    console.log(replace_item_info)
+                  }
+
+                }
+              }
+              for (let i = 0; i < this.table1.length; i++) {
+                if (this.table1[i]["key"] === key) {
+                  this.table1[i]["flag"] = 1;
+                }
+              }
+
+              for (let i = 0; i < this.table2.length; i++) {
+                if (this.table2[i]["key"] === map[key]) {
+                  this.table2[i]["flag"] = 1;
+                }
+              }
+
+              let obj = {};
+              obj.key = key;
+              obj.value = map[key];
+              this.table3.push(obj);
+
             }
 
+            this.refdata();
+            this.showHistoricalMapping = false;
           }
         }
-        for (let i = 0; i < this.table1.length; i++) {
-          if (this.table1[i]["key"] === key) {
-            this.table1[i]["flag"] = 1;
-          }
-        }
-
-        for (let i = 0; i < this.table2.length; i++) {
-          if (this.table2[i]["key"] === map[key]) {
-            this.table2[i]["flag"] = 1;
-          }
-        }
-
-        let obj = {};
-        obj.key = key;
-        obj.value = map[key];
-        this.table3.push(obj);
-
-      }
-
-      this.refdata();
+      })
     },
 
     //保存历史映射
@@ -624,6 +632,7 @@ export default {
 
     //对文件中字段与目标字段组中相同的字段进行关联，增加标识位，保证已关联字段无法选中
     addFlag() {
+      this.table3 = [];
       if (this.table1.length != 0 && this.table2.length != 0) {
         for (let i = 0; i < this.table1.length; i++) {
           for (let j = 0; j < this.table2.length; j++) {
