@@ -88,7 +88,13 @@
           <el-table-column prop="attributename" label="名称">
           </el-table-column>
           <el-table-column prop="limit" label="字段约束"> </el-table-column>
-          <el-table-column prop="isNotNull" label="是否为空"> </el-table-column>
+          <!-- <el-table-column prop="isNotNull" label="是否为空"> </el-table-column> -->
+          <el-table-column label="是否为空"> 
+            <template slot-scope="scope">
+              <span v-if="scope.row.isNotNull == 'true'">是</span>
+              <span v-else>否</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="sample" label="示范数据"> </el-table-column>
           <el-table-column label="操作" width="200px">
             <template slot-scope="scope">
@@ -122,7 +128,13 @@
           <el-table-column prop="attributename" label="名称">
           </el-table-column>
           <el-table-column prop="limit" label="字段约束"> </el-table-column>
-          <el-table-column prop="isNotNull" label="是否为空"> </el-table-column>
+          <!-- <el-table-column prop="isNotNull" label="是否为空"> </el-table-column> -->
+          <el-table-column label="是否为空"> 
+            <template slot-scope="scope">
+              <span v-if="scope.row.isNotNull == 'true'">是</span>
+              <span v-else>否</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="sample" label="示范数据"> </el-table-column>
           <el-table-column label="操作" width="200px">
             <template slot-scope="scope">
@@ -499,7 +511,7 @@ export default {
       showLimit["fieldType"] = this.field2name("char"); // 转换为名称
       showLimit["limit"] = "0-255"
       showLimit["sample"] = _sample;
-      showLimit["isNotNull"] = "是"
+      showLimit["isNotNull"] = "true"
       this.showLimits.push(showLimit);
       console.log(showLimit)
 
@@ -508,7 +520,7 @@ export default {
       limit['tableName'] = this.tableHeader.dataname
       limit['columnName'] = columnName
 
-      limit['tokenEnume'] = "char"
+      limit['tokenEnume'] = "false"
       limit['itemEnume'] = "null"
       limit['lengthMin'] = 0
       limit['lengthMax'] = 255
@@ -637,12 +649,12 @@ export default {
           })
           this.limitations[this.selectedRowIndex]['itemEnume'] = itemEnumeList
         } else if (this.editForm.fieldType == "char") {
-          this.limitations[this.selectedRowIndex]['tokenEnume'] = "char"
+          this.limitations[this.selectedRowIndex]['tokenEnume'] = "false"
           this.limitations[this.selectedRowIndex]['itemEnume'] = "null"
           this.limitations[this.selectedRowIndex]['lengthMin'] = parseInt(this.editForm.minLength)
           this.limitations[this.selectedRowIndex]['lengthMax'] = parseInt(this.editForm.maxLength)
         } else {   //lengthMin暂定为大小约束
-          this.limitations[this.selectedRowIndex]['tokenEnume'] = "float"
+          this.limitations[this.selectedRowIndex]['tokenEnume'] = "false"
           this.limitations[this.selectedRowIndex]['itemEnume'] = "null"
           this.limitations[this.selectedRowIndex]['lengthMin'] = parseFloat(this.editForm.minLength)
           this.limitations[this.selectedRowIndex]['lengthMax'] = parseFloat(this.editForm.maxLength)
@@ -753,10 +765,20 @@ export default {
       a["tableDescription"] = this.tableHeader.descript;
       a["customTables"] = this.tableData;
       a["tableUsername"] = this.current_username;
-
+      console.log(a)
       try {
         var create_table_response = await createTable(a);
       } catch (error) {
+        this.$alert("创建表失败" + a, "提示", {
+          confirmButtonText: "确定",
+          callback: (action) => { },
+        });
+        this.active = 1;
+        console.log(1)
+        return;
+      }
+
+      if(!create_table_response.success){
         this.$alert("创建表失败" + a, "提示", {
           confirmButtonText: "确定",
           callback: (action) => { },
@@ -1012,13 +1034,13 @@ export default {
           limit['itemEnume'] = itemEnumeList
           this.limitations.push(limit)
         } else if (this.tableForm.fieldType == "char") {
-          limit['tokenEnume'] = "char"
+          limit['tokenEnume'] = "false"
           limit['itemEnume'] = "null"
           limit['lengthMin'] = parseInt(this.tableForm.minLength)
           limit['lengthMax'] = parseInt(this.tableForm.maxLength)
           this.limitations.push(limit)
         } else {   // double 
-          limit['tokenEnume'] = "float"
+          limit['tokenEnume'] = "false"
           limit['itemEnume'] = "null"
           limit['lengthMin'] = parseFloat(this.tableForm.minLength)
           limit['lengthMax'] = parseFloat(this.tableForm.maxLength)

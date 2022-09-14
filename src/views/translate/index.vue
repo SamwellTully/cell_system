@@ -144,8 +144,8 @@
                   <el-tag>{{ value }}</el-tag>
                   ==========
                   <el-tag>{{ key }}</el-tag>
-                  <div v-show="props.row.relation[value]">
-                    <div v-for="(rmap, rindex) in props.row.relation[value]" :key="rindex">
+                  <div v-show="props.row.relation[key]">
+                    <div v-for="(rmap, rindex) in props.row.relation[key]" :key="rindex">
                       <div v-for="(rvalue, rkey) in rmap" :key="rkey">
                         <el-tag type="info">{{ rkey }}</el-tag><i class="el-icon-arrow-right"></i><i
                           class="el-icon-arrow-right"></i>
@@ -159,7 +159,8 @@
           </el-table-column>
 
           <el-table-column label="目标文件" prop="name"> </el-table-column>
-
+          <el-table-column label="所属单位" prop="company"> </el-table-column>
+          <el-table-column label="建立时间" prop="time"> </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">应用</el-button>
@@ -434,7 +435,7 @@ export default {
     };
   },
 
-  async created() {
+  async activated() {
     //获取用户信息
     var getUserInfoResponse = await this.getUserInfo()
     this.userInfo = getUserInfoResponse.data
@@ -448,7 +449,8 @@ export default {
 
     //初始化目标字段组多选框选中的表名
     this.value = this.$route.params.tableName;
-
+    this.table3 = [];
+    this.replaceField = [];
     //获取数据库中的所有表名
     setTimeout(() => {
       this.getDatabase();
@@ -474,7 +476,7 @@ export default {
       this.refdata();
       this.resetTabele(this.table1);
       this.resetTabele(this.table2);
-      this.addFlag();
+      // this.addFlag();
     }, 900);
 
     //遍历文件得到的各字段的所有源值取值，获取源值的多选框数据
@@ -538,6 +540,8 @@ export default {
         his_mapping_item["name"] = mapping_data[item].targetFile
         his_mapping_item["map"] = JSON.parse(mapping_data[item].fieldReplace)
         his_mapping_item["relation_id"] = mapping_data[item].id
+        his_mapping_item["time"] = mapping_data[item].timestamp
+        his_mapping_item["company"] = mapping_data[item].sourceCompany
         for (var replace_key in relation_map) {
           this.relation_map[replace_key] = relation_map[replace_key]
         }
@@ -590,20 +594,20 @@ export default {
             for (const key in map) {
               console.info(key);
               console.info(map[key]);
-              if (relation_map[key] != null) { // 添加替换关系
+              if (relation_map[map[key]] != null) { // 添加替换关系
                 console.log("内容替换的内容")
-                console.log(relation_map[key])
-                for (var i = 0; i < relation_map[key].length; i++) {
+                console.log(relation_map[map[key]])
+                for (var i = 0; i < relation_map[map[key]].length; i++) {
                   console.log(i)
-                  console.log(relation_map[key][i])
-                  for (var relation_key in relation_map[key][i]) {
+                  console.log(relation_map[map[key]][i])
+                  for (var relation_key in relation_map[map[key]][i]) {
                     console.log("relation_key")
                     console.log(relation_key)
                     var replace_item_info = {};
                     replace_item_info['originalField'] = key
                     replace_item_info['targetField'] = map[key]
                     replace_item_info['originalValue'] = relation_key
-                    replace_item_info['targetValue'] = relation_map[key][i][relation_key]
+                    replace_item_info['targetValue'] = relation_map[map[key]][i][relation_key]
                     this.replaceField.push(replace_item_info)
                     console.log(replace_item_info)
                   }

@@ -81,8 +81,11 @@
             </template>
           </el-table-column>
 
+          <el-table-column label="映射名称" prop="MapName"> </el-table-column>
           <el-table-column label="目标文件" prop="name"> </el-table-column>
-
+          <el-table-column label="目标文件单位" prop="company"> </el-table-column>
+          <el-table-column label="建立时间" prop="time"> </el-table-column>
+          
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button @click="setMapping(scope.row.map, scope.row.relation)" size="mini">应用</el-button>
@@ -476,7 +479,9 @@ export default {
 
     //初始化目标字段组多选框选中的表名
     this.chosenTable = this.$route.params.tableName;
-    this.value = this.$route.params.tableName; //this.value默认为表二
+    this.value = ''; //this.value默认为表二
+    this.table2 = null;
+    this.table3 = null;
     //获取数据库中的所有表名
     setTimeout(() => {
       this.getDatabase();
@@ -485,7 +490,7 @@ export default {
     //根据表名获取目标字段表格数据
     var x = null;
     setTimeout(() => {
-      x = this.getData(this.value);
+      x = this.getData(this.chosenTable);
     }, 300);
     setTimeout(() => {
       let delete_time_and_operator = []
@@ -495,7 +500,7 @@ export default {
         }
       }
       this.table1 = delete_time_and_operator;
-      this.table2 = delete_time_and_operator;
+      // this.table2 = delete_time_and_operator;
     }, 600);
 
     //刷新，为表格数据打上标志位，用于控制双击取消选中
@@ -596,7 +601,7 @@ export default {
         if(mapping_response.data[i].sourceFile == this.chosenTable && mapping_response.data[i].targetFile == this.value){
           mapping_data.push(mapping_response.data[i]);
         }
-        if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile == this.chosenTable){
+        if(mapping_response.data[i].sourceFile == this.value && mapping_response.data[i].targetFile == this.chosenTable && this.value != this.chosenTable){
           mapping_data.push(mapping_response.data[i]);
         }
         // if( mapping_response.data[i].targetFile != ''){
@@ -614,6 +619,9 @@ export default {
         his_mapping_item["name"] = mapping_data[item].targetFile
         his_mapping_item["map"] = JSON.parse(mapping_data[item].fieldReplace)
         his_mapping_item["relation_id"] = mapping_data[item].id
+        his_mapping_item["time"] = mapping_data[item].timestamp
+        his_mapping_item["company"] = mapping_data[item].targetCompany
+        his_mapping_item["MapName"] = mapping_data[item].mappingName
         for (var replace_key in relation_map) {
           this.relation_map[replace_key] = relation_map[replace_key]
         }

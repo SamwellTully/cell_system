@@ -40,7 +40,7 @@
                   </template> -->
                 </el-table-column>
 
-                <el-table-column label="创建单位" width="180px" align="center">
+                <el-table-column label="创建单位" width="150px" align="center">
                   <template slot-scope="scope">
                     {{ scope.row.gTableinstitution }}
                   </template>
@@ -64,10 +64,10 @@
                   <el-button type="danger">删除</el-button>
                 </el-table-column>
 
-                <el-table-column class-name="status-col" label="操作3" width="110" align="center">
+                <el-table-column class-name="status-col" label="操作3" width="120" align="center">
 
                   <template slot-scope="scope">
-                    <el-button @click="jumpForm(scope.row.gTalename)">数据转换</el-button>
+                    <el-button @click="jumpForm(scope.row.gTalename)" type="success">数据转换</el-button>
                   </template>
 
 
@@ -76,7 +76,7 @@
                 <el-table-column class-name="status-col" label="操作4" width="110" align="center">
 
                   <template slot-scope="scope">
-                    <el-button @click="jumpTrans(scope.row.gTalename)">映射</el-button>
+                    <el-button @click="jumpTrans(scope.row.gTalename)" type="info">映射</el-button>
                   </template>
 
 
@@ -186,7 +186,7 @@
                   </template>
                 </el-table-column>
 
-                <el-table-column label="创建单位" width="180px" align="center">
+                <el-table-column label="创建单位" width="150px" align="center">
                   <template slot-scope="scope">
                     {{ scope.row.gTableinstitution }}
                   </template>
@@ -212,10 +212,10 @@
                   <el-button type="danger">删除</el-button>
                 </el-table-column>
 
-                <el-table-column class-name="status-col" label="操作3" width="110" align="center">
+                <el-table-column class-name="status-col" label="操作3" width="120" align="center">
 
                   <template slot-scope="scope">
-                    <el-button @click="jumpForm(scope.row.gTalename)">数据转换</el-button>
+                    <el-button @click="jumpForm(scope.row.gTalename)" type="success">数据转换</el-button>
                   </template>
 
 
@@ -224,7 +224,7 @@
                 <el-table-column class-name="status-col" label="操作4" width="110" align="center">
 
                   <template slot-scope="scope">
-                    <el-button @click="jumpTrans(scope.row.gTalename)">映射</el-button>
+                    <el-button @click="jumpTrans(scope.row.gTalename)" type="info">映射</el-button>
                   </template>
 
                 </el-table-column>
@@ -861,36 +861,38 @@ export default {
     },
     // 查看公开文件按钮
     checkPublicTable(tName) {
+      // this.checkPublicTableVisible = true;
+      // this.checkLoading = true
+      // let getDataParams = new URLSearchParams();
+      // getDataParams.append("tableName", tName);
+      // let allKeys = []
+      // this.$axios({
+      //   method: 'post',
+      //   url: "http://8.134.49.56:8000/G/Showattribute",
+      //   data: getDataParams
+      // }).then((response) => {
+      //   allKeys = Object.keys(response.data.data[0]) // response.data返回的是个数组，里面只有一个元素，为该表的示范数据（键值对），通过keys()获得所有键
+      //   this.fieldKeys = allKeys // 必须在里面赋值
+      // })
       this.checkPublicTableVisible = true;
       this.checkLoading = true
-      let getDataParams = new URLSearchParams();
-      getDataParams.append("tableName", tName);
-      let allKeys = []
-      this.$axios({
-        method: 'post',
-        url: "http://8.134.49.56:8000/G/getdata",
-        data: getDataParams
-      }).then((response) => {
-        allKeys = Object.keys(response.data[0]) // response.data返回的是个数组，里面只有一个元素，为该表的示范数据（键值对），通过keys()获得所有键
-        this.fieldKeys = allKeys // 必须在里面赋值
-      })
-
+      this.fieldKeys = ["tokenEnume","Field","Type","Null","lengthMin","lengthMax","enumeration"]
       // 获取表格数据
       let params = new URLSearchParams();
       params.append("tableName", tName);
       this.$axios({
         method: 'post',
-        url: "http://8.134.49.56:8000/G/GetAllData",
+        url: "http://8.134.49.56:8000/G/Showattribute",
         data: params
       }).then((response) => {
         console.log("gridData")
         console.log(response.data.data)
         this.gridData = response.data.data
-        for (let i = 0; i < this.gridData.length; i++) {
-          let tmp;
-          tmp = this.gridData[i]["导入时间"].slice(0, 10) + " " + this.gridData[i]["导入时间"].slice(11, 19);
-          this.gridData[i]["导入时间"] = tmp;
-        }
+        // for (let i = 0; i < this.gridData.length; i++) {
+        //   let tmp;
+        //   tmp = this.gridData[i]["导入时间"].slice(0, 10) + " " + this.gridData[i]["导入时间"].slice(11, 19);
+        //   this.gridData[i]["导入时间"] = tmp;
+        // }
       })
       this.checkLoading = false // 加载成功
     },
@@ -898,34 +900,34 @@ export default {
     checkPrivateTable(tName) {
       this.checkPrivateTableVisible = true;
       this.checkLoading = true
-      let getDataParams = new URLSearchParams();
-      getDataParams.append("tableName", tName);
-      let allKeys = []
-      this.$axios({
-        method: 'post',
-        url: "http://8.134.49.56:8000/G/getdata",
-        data: getDataParams
-      }).then((response) => {
-        allKeys = Object.keys(response.data[0]) // response.data返回的是个数组，里面只有一个元素，为该表的示范数据（键值对），通过keys()获得所有键
-        this.fieldKeys = allKeys // 必须在里面赋值
-      })
-
+      // let getDataParams = new URLSearchParams();
+      // getDataParams.append("tableName", tName);
+      // let allKeys = []
+      // this.$axios({
+      //   method: 'post',
+      //   url: "http://8.134.49.56:8000/G/Showattribute",
+      //   data: getDataParams
+      // }).then((response) => {
+      //   allKeys = Object.keys(response.data.data[0]) // response.data返回的是个数组，里面只有一个元素，为该表的示范数据（键值对），通过keys()获得所有键
+      //   this.fieldKeys = allKeys // 必须在里面赋值
+      // })
+      this.fieldKeys = ["tokenEnume","Field","Type","Null","lengthMin","lengthMax","enumeration"]
       // 获取表格数据
       let params = new URLSearchParams();
       params.append("tableName", tName);
       this.$axios({
         method: 'post',
-        url: "http://8.134.49.56:8000/G/GetAllData",
+        url: "http://8.134.49.56:8000/G/Showattribute",
         data: params
       }).then((response) => {
         console.log("gridData")
         console.log(response.data.data)
         this.gridData = response.data.data
-        for (let i = 0; i < this.gridData.length; i++) {
-          let tmp;
-          tmp = this.gridData[i]["导入时间"].slice(0, 10) + " " + this.gridData[i]["导入时间"].slice(11, 19);
-          this.gridData[i]["导入时间"] = tmp;
-        }
+        // for (let i = 0; i < this.gridData.length; i++) {
+        //   let tmp;
+        //   tmp = this.gridData[i]["导入时间"].slice(0, 10) + " " + this.gridData[i]["导入时间"].slice(11, 19);
+        //   this.gridData[i]["导入时间"] = tmp;
+        // }
       })
       this.checkLoading = false // 加载成功
     },
@@ -1150,6 +1152,8 @@ export default {
   margin-bottom: 0;
   width: 50%;
 }
+.el-button--translate{background: #23C6C8;}
+.el-button--mapping{background: #FCB065;}
 </style>
 <style lang="scss">
 .markinput {

@@ -1,7 +1,7 @@
 <template>
   <div class="all" v-loading.fullscreen.lock="fullscreenLoading">
     <div class="tip">
-      <h3 align="center">上传文件提示</h3>
+      <h3 align="center">自动建表上传文件提示</h3>
       文件格式要求单表头，行列无杂乱数据，不支持合并单元格和内部多空行等杂乱数据格式上传；若无法上传，请更改后重新上传。
     </div>
 <h3></h3>
