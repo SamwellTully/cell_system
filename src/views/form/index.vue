@@ -33,13 +33,13 @@
         <el-input  v-model="form.userEmail">
         </el-input>
       </el-form-item>
-      <el-form-item label="用户权限">
+      <!-- <el-form-item label="用户权限">
         <el-select v-model="form.userPrivileges" @change="handleIsopenSelect">
           <el-option label="一级用户" value= 0 />
           <el-option label="二级用户" value= 1 />
           <el-option label="三级用户" value= 2 />
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
      <el-button type="primary" class="submit" @click="onSubmit">提交修改</el-button>
     </el-form>
   </div>

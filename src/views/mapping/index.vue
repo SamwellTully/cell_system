@@ -815,6 +815,9 @@ export default {
           }
         }
       }
+      //   this.publicFiles = (await getList(getToken())).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 }) 排序示例
+      this.table1 = this.table1.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
+      this.table2 = this.table2.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
       //刷新
       this.refdata();
       this.resetTabele(this.table3)
@@ -991,6 +994,8 @@ export default {
       }
 
       //重置表格选中状态
+      this.table1 = this.table1.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
+      this.table2 = this.table2.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
       this.$refs.t1.setCurrentRow();
       this.$refs.t2.setCurrentRow();
       this.currentRow1 = null;
@@ -1031,6 +1036,8 @@ export default {
       }
       this.table1 = newTableData1;
       this.table2 = newTableData2;
+      this.table1 = this.table1.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
+      this.table2 = this.table2.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
     },
 
     //内容替换的删除

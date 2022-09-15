@@ -53,7 +53,7 @@
           登录
         </el-button>
 
-        <el-button class="thirdparty-button" style="width: 30%" type="primary" @click="dialogFormVisible=true">
+        <el-button class="thirdparty-button" style="width: 30%" type="primary" @click="getHosAndReg()">
           注册账号
         </el-button>
       </el-row>
@@ -75,8 +75,8 @@
     <div class="register-container">
       <el-dialog class="register-container" title="注册申请提交" :visible.sync="dialogFormVisible" :center="true" width="50%">
         <el-form :inline="true" style="color: #fff;"  :model="register">
-          <el-form-item label="法人机构代码" :label-width="formLabelWidth">
-            <el-input v-model="register.institutionName" autocomplete="off" placeholder="请输入法人机构代码" />
+          <el-form-item label="机构名称" :label-width="formLabelWidth">
+            <el-input v-model="register.institutionName" autocomplete="off" placeholder="请输入法人机构名称" />
           </el-form-item>
           <el-form-item label="法人机构类型" :label-width="formLabelWidth">
             <el-input v-model="register.institutionType" autocomplete="off" placeholder="请输入法人机构类型" />
@@ -107,6 +107,12 @@
           </el-form-item>
           <el-form-item label="登录密码" :label-width="formLabelWidth">
             <el-input v-model="register.userPassword" type="password" autocomplete="off" placeholder="请输入密码" />
+          </el-form-item>
+          <el-form-item label="选择所属医院" :label-width="formLabelWidth">
+            <el-select v-model="register.belongHos" placeholder="请选择您要申请的医院">
+              <el-option v-for="item in hospitals" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -161,8 +167,10 @@ export default {
         userPhoneNum: '',
         userEmail: '',
         authorization: '',
-        userPassword: ''
+        userPassword: '',
+        belongHos:'',
       },
+      hospitals:[],
       disabled:false,
       time:0,
       btntxt:"重新发送",
@@ -213,6 +221,20 @@ export default {
     // window.removeEventListener('storage', this.afterQRScan)
   },
   methods: {
+    getHosAndReg(){
+      this.dialogFormVisible = true;
+      this.$http.get("http://8.134.49.56:8000/hospitalAdmin/list").then((res) => {
+        this.hospitals = [];
+        let temp = [];
+        for (var i = 0; i < res.data.data.length; i++) {
+          let obj = {};
+          obj.value = res.data.data[i]["hospitalName"];
+          obj.label = res.data.data[i]["hospitalName"];
+          temp.push(obj);
+        }
+        this.hospitals = temp;
+      });
+    },
     registerf() {
       // this.dialogFormVisible = false
       // eslint-disable-next-line eqeqeq
@@ -229,6 +251,7 @@ export default {
         params.append("userName", this.register.userName);
         params.append("userPrivileges", 0);
         params.append("userPassword", this.register.userPassword);
+        params.append("hospitalName",this.belongHos);
         axios.post(this.url + '/user/register', params)
           .then(res => {
             if (res.data.code === 200) {

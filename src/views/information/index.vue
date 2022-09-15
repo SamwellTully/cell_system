@@ -68,6 +68,30 @@
       </el-table>
     </div>
 
+    <el-dialog class="input-container" title="请输入错误文件名称" :visible.sync="wFileNameVisable" :center="true">
+      <el-input v-model="wFileName"></el-input>
+      <el-row>  </el-row>
+      <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+
+        <!-- 作空格用 -->
+        <el-col :span="6">
+          <div class="grid-content"></div> 
+        </el-col>
+
+        <el-col :span="6">
+          <div class="grid-content">
+            <el-button type="primary" @click="savewFileName()" style="width: 100%">提 交</el-button>
+          </div>
+        </el-col>
+
+        <el-col :span="6">
+          <div class="grid-content"></div>
+        </el-col>
+
+      </el-row>
+      
+    </el-dialog>
+
     <el-upload
       class="upload-demo"
       drag
@@ -102,6 +126,9 @@ export default {
       file: null,
       src: pic,
       fullscreenLoading: false,
+      wFileNameVisable: false,
+      wFileName: '',
+      responseTemp: null,
       uploadExample: [
         {
           savedGroupName: "中山大学附属肿瘤医院",
@@ -178,15 +205,32 @@ export default {
           },
         });
     },
+    savewFileName(){
+      //输出至文本的字符串
+      let wrongList = '';
+        for(let i = 0; i < this.responseTemp.data.data.wrongInfList.length; i++){
+          wrongList += (this.responseTemp.data.data.wrongInfList[i] + '\n'); //添加换行符
+        }
+        //var data = JSON.stringify(response.data.data.wrongInfList);
+        let str = new Blob([wrongList] , {type : 'text/plain;charset=utf-8'});
+        saveAs(str,this.wFileName + '.txt');
+        this.wFileName = '';
+        this.wFileNameVisable = false;
+    },
     async upSuccess(response, file, fileList) {
-      this.originalField = response.data[1];
       let obj = []; //上传表的表头与示范数据对
       let upAllKeys = [] //上传文件的所有表头字段
       //取上传文件的表头并整理
-      Object.keys(this.originalField).some((key) => {
-        obj.push({ key: key, value: this.originalField[key] });
-        upAllKeys.push(key)
-      });
+      for(let i = 0; i < response.data.length ; i++){
+        this.originalField = response.data[i];
+        Object.keys(this.originalField).some((key) => {
+          console.log(key)
+          if(!(key in obj)){
+            obj.push({ key: key, value: this.originalField[key] });
+            upAllKeys.push(key)
+          }
+        });
+      }
 
       //已通过格式判断，现进行表头字段判断
       let selectTableName = this.$route.params.tableName;
@@ -202,6 +246,7 @@ export default {
       })
       let lackCol = []; //用以记录上传表与所选表的表头差异
       var flag = true;
+      var checkFlag = true;
       for(let i = 0; i < selectAllKeys.length; i++){
         if(upAllKeys.includes(selectAllKeys[i]) == false && selectAllKeys[i] != "导入时间" && selectAllKeys[i] != "操作人"){
           flag = false;
@@ -243,44 +288,41 @@ export default {
                 },
               });
             }else if(response.data.data.wrongInfList.length != 0){
+                  checkFlag = false;
                   this.fullscreenLoading = false;
                   this.$alert("上传文件内容有误，请重新上传", "提示", {
                   confirmButtonText: "确定",
                   callback: (action) => {
                     if (action === "confirm") {
-                      this.$router.push({
-                      name: "Example",
-                      params: {
-                      tableName: selectTableName, 
-                      //跳转至上传页面时携带所选表页面
-                      },
-                    });
+                      this.responseTemp = response;
+                      this.wFileNameVisable = true;
+                    //   this.$router.push({
+                    //   name: "Example",
+                    //   params: {
+                    //   tableName: selectTableName, 
+                    //   //跳转至上传页面时携带所选表页面
+                    //   },
+                    // });
                   }
-                  //输出至文本的字符串
-                  let wrongList = '';
-                  for(let i = 0; i < response.data.data.wrongInfList.length; i++){
-                    wrongList += (response.data.data.wrongInfList[i] + '\n'); //添加换行符
-                  }
-                  //var data = JSON.stringify(response.data.data.wrongInfList);
-                  let str = new Blob([wrongList] , {type : 'text/plain;charset=utf-8'});
-                  saveAs(str,'错误信息.txt');
                 },
               });
             }
         })
         
-        //文件内容检验正确
-        this.originalField = obj; // originalField 是在映射时候初始显示的值，表示得到的数据内容第一行
-        this.fullscreenLoading = false;
-        this.$router.push({
-          name: "Translate",
-          params: {
-            val: this.originalField,
-            file: this.file, // 文件信息
-            data: response.data,
-            tableName: this.tableName,
-          },
-        });
+        if(checkFlag == true){
+          //文件内容检验正确
+          this.originalField = obj; // originalField 是在映射时候初始显示的值，表示得到的数据内容第一行
+          this.fullscreenLoading = false;
+          this.$router.push({
+            name: "Translate",
+            params: {
+              val: this.originalField,
+              file: this.file, // 文件信息
+              data: response.data,
+              tableName: this.tableName,
+            },
+          });
+        }
       }else{
         this.fullscreenLoading = false;
         this.$alert("上传文件信息有误,缺乏列：" + lackCol, "提示", {

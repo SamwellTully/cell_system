@@ -719,6 +719,8 @@ export default {
         }
       }
       //刷新
+      this.table1 = this.table1.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
+      this.table2 = this.table2.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
       this.refdata();
     },
 
@@ -893,6 +895,8 @@ export default {
       }
 
       //重置表格选中状态
+      this.table1 = this.table1.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
+      this.table2 = this.table2.sort(function(o1, o2) {return o1.flag > o2.flag ? 1 : -1})
       this.$refs.t1.setCurrentRow();
       this.$refs.t2.setCurrentRow();
       this.currentRow1 = null;

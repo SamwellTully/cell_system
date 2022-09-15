@@ -66,7 +66,7 @@
         <el-table-column
         show-overflow-tooltip
           prop="institutionName"
-          label="机构代码"
+          label="机构名称"
           width="listWidth">
         </el-table-column>
         <el-table-column
@@ -99,12 +99,12 @@
           label="联系人邮箱"
           width="100px">
         </el-table-column>
-        <el-table-column
+        <!-- <el-table-column
         show-overflow-tooltip
           prop="userPrivileges"
           label="用户权限"
           width="listWidth">
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column
         show-overflow-tooltip
           prop="institutionInstruction"
@@ -132,7 +132,7 @@
         <el-table-column
         show-overflow-tooltip
           prop="institutionPostalCode"
-          label="邮政编码"
+          label="机构代码"
           width="listWidth">
         </el-table-column>
         <el-table-column
@@ -163,8 +163,8 @@
      <div class="register-container">
       <el-dialog class="register-container" title="注册申请提交" :visible.sync="addUserButton"  width="50%">
         <el-form :inline="true"  :model="formInlineAdd">
-          <el-form-item label="机构代码" label-width="100px">
-            <el-input v-model="formInlineAdd.institutionName" autocomplete="off" placeholder="请输入机构代码" />
+          <el-form-item label="机构名称" label-width="100px">
+            <el-input v-model="formInlineAdd.institutionName" autocomplete="off" placeholder="请输入机构名称" />
           </el-form-item>
           <el-form-item label="机构类型" label-width="100px">
             <el-input v-model="formInlineAdd.institutionType" autocomplete="off" placeholder="请输入机构类型" />
@@ -175,8 +175,8 @@
           <el-form-item label="通讯地址" label-width="100px">
             <el-input v-model="formInlineAdd.institutionAddress" autocomplete="off" placeholder="请输入通讯地址" />
           </el-form-item>
-          <el-form-item label="邮政编码" label-width="100px">
-            <el-input v-model="formInlineAdd.institutionPostalCode" autocomplete="off" placeholder="请输入邮政编码" />
+          <el-form-item label="机构代码" label-width="100px">
+            <el-input v-model="formInlineAdd.institutionPostalCode" autocomplete="off" placeholder="请输入机构代码" />
           </el-form-item>
           <el-form-item label="联系人姓名" label-width="100px">
             <el-input v-model="formInlineAdd.userName" autocomplete="off" placeholder="请输入联系人姓名" />
@@ -210,8 +210,8 @@
     <div class="edit-container">
       <el-dialog class="edit-container" title="修改提交" :visible.sync="eidt"  width="50%">
         <el-form :inline="true" style="color: #fff;"  :model="formInlineEdit">
-          <el-form-item label="机构代码" label-width="100px">
-            <el-input v-model="formInlineEdit.institutionName"  placeholder="请输入机构代码" />
+          <el-form-item label="机构名称" label-width="100px">
+            <el-input v-model="formInlineEdit.institutionName"  placeholder="请输入机构名称" />
           </el-form-item>
           <el-form-item label="机构类型" label-width="100px">
             <el-input v-model="formInlineEdit.institutionType"  placeholder="请输入机构类型" />
@@ -222,8 +222,8 @@
           <el-form-item label="通讯地址" label-width="100px">
             <el-input v-model="formInlineEdit.institutionAddress"  placeholder="请输入通讯地址" />
           </el-form-item>
-          <el-form-item label="邮政编码" label-width="100px">
-            <el-input v-model="formInlineEdit.institutionPostalCode" placeholder="请输入邮政编码" />
+          <el-form-item label="机构代码" label-width="100px">
+            <el-input v-model="formInlineEdit.institutionPostalCode" placeholder="请输入机构代码" />
           </el-form-item>
           <el-form-item label="联系人姓名" label-width="100px">
             <el-input v-model="formInlineEdit.userName" placeholder="请输入联系人姓名" />
@@ -270,7 +270,7 @@ export default {
         input:[{
         id:0,
         contain:'',
-        type:'机构代码',
+        type:'机构名称',
         input:''}]
       },
       //条件连接数据
@@ -288,7 +288,7 @@ export default {
       //条件数据
       firstColumn: [{
         value:'institutionName',
-        label:'机构代码',
+        label:'机构名称',
       },{
         value:'institutionType',
         label:'机构类型',
@@ -300,7 +300,7 @@ export default {
         label:'通讯地址',
       },{
         value:'institutionPostalCode',
-        label:'邮政编码',
+        label:'机构代码',
       },{
         value:'userName',
         label:'联系人姓名',
@@ -391,7 +391,7 @@ export default {
       this.formInline.input.push({
         id:this.currentid,
         contain:'并含',
-        type:'机构代码',
+        type:'机构名称',
         input:'',
       })
     },
@@ -412,7 +412,7 @@ export default {
         input:[{
         id:0,
         contain:'',
-        type:'机构代码',
+        type:'机构名称',
         input:''}]
       }
       this.multisearch()
@@ -427,7 +427,7 @@ export default {
           this.formInline.input[j].contain='andwith'
         }
         //初始条件设置
-        if(this.formInline.input[j].type=='机构代码'){
+        if(this.formInline.input[j].type=='机构名称'){
           this.formInline.input[j].type='institutionName'
         }
 //条件之间的关系
