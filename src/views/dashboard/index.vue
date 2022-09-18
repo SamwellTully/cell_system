@@ -973,15 +973,11 @@ export default {
     },
     async fetchData(id) {
       this.listLoading = true
-      // if((await getList(getToken())).data != null){
-      //   this.publicFiles = (await getList(getToken())).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
-      // }
+      if((await getList(getToken())).data != null){
+        this.publicFiles = (await getList(getToken())).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
+      }
       if((await getListById(id)).data != null){
         this.privateFiles = (await getListById(id)).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
-      }
-      //暂时对公开文件进行调整
-      if((await getListById(id)).data != null){
-        this.publicFiles = (await getListById(id)).data.sort(function (o1, o2) { return o1.time > o2.time ? 1 : -1 })
       }
       this.publicTotal = this.publicFiles.length
       this.privateTotal = this.privateFiles.length

@@ -390,10 +390,30 @@ li:hover{
 import { getToken } from '@/utils/auth'
 import Axios from "axios";
 import { checkRelation, checkContext, deleteHisMapping } from "@/api/mapping"
+import { checkDecimal, checkAngle, checkLon, checkLat, checkNull, checkArray, checkLong } from '@/utils/check'
 
 export default {
   data() {
+    var checkNum = (rule, value, callback) => {
+        if (!value) {
+          return callback(new Error('金额不能为空'));
+        }
+        setTimeout(() => {
+          if (!Number.isInteger(value)) {
+            callback(new Error('请输入数字值'));
+          } else {
+            if (value > rule.maxValue) {
+              callback(new Error('超出有效值范围('+rule.minValue+','+rule.maxValue+')'));
+            } else if(value < rule.minValue){
+              callback(new Error('超出有效值范围('+rule.minValue+','+rule.maxValue+')'));
+            }else {
+              callback();
+            }
+          }
+        }, 100);
+      };
     return {
+      checkNum,
       inputText:"",
       chosenTable:" ",
       mappingName:'',
@@ -469,6 +489,7 @@ export default {
     //获取用户信息
     var getUserInfoResponse = await this.getUserInfo()
     this.userInfo = getUserInfoResponse.data
+    this.replaceField = [];
     //初始化未关联字段表格数据，获取table1数据
     //this.originalField = this.$route.params.val;
     //this.table1 = this.originalField;
@@ -578,7 +599,7 @@ export default {
     //   this.inputSearchVisable = false;
     //   this.inputText = '';
     // },
-
+    
     async deleteHisMapping(his_mapping_id){
       await deleteHisMapping(this.userInfo.userId, this.value, his_mapping_id)
     },
@@ -1077,7 +1098,9 @@ export default {
       if (this.$refs["ruleForm"] !== undefined) {
         this.$refs["ruleForm"].resetFields();
       }
+      //清除上一个表单中的校验规则
       this.rules.value.splice(1, 1);
+      this.rules.key.splice(1,1);
       // this.originalSeletionData = this.fileSeletionData[row.key]; 取值方式修改
 
       //是否为空
@@ -1098,17 +1121,42 @@ export default {
               this.originalSeletionData = res.data.data;
             });
         } else {
-          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data_chosen).then((res) => {
+          //通过showattribute参数对类型进行判断
+          let charOrNum = false; //默认为字符型
+          this.$axios({
+          method: 'post',
+          url: "http://8.134.49.56:8000/G/Showattribute",
+          params: {tableName:this.value}
+          }).then((response) => {
+            for(let i = 0; i < response.data.data.length; i++){
+              //此处是源值检验
+              if(response.data.data[i].Field == row.key){
+                if(!response.data.data[i].Type.includes("char")){
+                  charOrNum = true;
+                }
+              }
+            }
+            this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data_chosen).then((res) => {
             //根据长度限制为目标值添加校验规则
-            if (res.data.data.length !== 0) {
+            if (res.data.data.length !== 0 && !charOrNum) {
               let obj = {};
               obj["min"] = res.data.data[0].lengthMin;
               obj["max"] = res.data.data[0].lengthMax;
               obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
               obj["trigger"] = "blur";
               this.rules.key.push(obj);
+            }else if(res.data.data.length !== 0 && charOrNum){
+              let obj = {};
+              obj["validator"] = this.checkNum;
+              obj["minValue"] = res.data.data[0].lengthMin;
+              obj["maxValue"] = res.data.data[0].lengthMax;
+              obj["message"] = "大小在 " + obj["minValue"] + " 到 " + obj["maxValue"] + "之间";
+              obj["trigger"] = "blur";
+              this.rules.key.push(obj);
             }
           });
+          })
+          //
         }
       });
 
@@ -1128,17 +1176,42 @@ export default {
               this.mulSelectionData = res.data.data;
             });
         } else {
-          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
+          let charOrNum = false; //默认为字符型
+          this.$axios({
+          method: 'post',
+          url: "http://8.134.49.56:8000/G/Showattribute",
+          params: {tableName:this.value}
+          }).then((response) => {
+            for(let i = 0; i < response.data.data.length; i++){
+              //此处是源值检验
+              if(response.data.data[i].Field == row.value){
+                if(!response.data.data[i].Type.includes("char")){
+                  charOrNum = true;
+                }
+              }
+            }
+            this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
             //根据长度限制为目标值添加校验规则
-            if (res.data.data.length !== 0) {
+            //通过showattribute参数对类型进行判断
+            if (res.data.data.length !== 0 && charOrNum == false) {
               let obj = {};
               obj["min"] = res.data.data[0].lengthMin;
               obj["max"] = res.data.data[0].lengthMax;
               obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
               obj["trigger"] = "blur";
               this.rules.value.push(obj);
+            }else if(res.data.data.length !== 0 && charOrNum == true){
+              let obj = {};
+              obj["validator"] = this.checkNum;
+              obj["minValue"] = res.data.data[0].lengthMin;
+              obj["maxValue"] = res.data.data[0].lengthMax;
+              obj["message"] = "大小在 " + obj["minValue"] + " 到 " + obj["maxValue"] + "之间";
+              obj["trigger"] = "blur";
+              this.rules.value.push(obj);
             }
           });
+          })
+          //
         }
       });
 

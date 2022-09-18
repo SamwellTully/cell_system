@@ -81,6 +81,7 @@ export const constantRoutes = [
         meta: { title: '上传', icon: 'el-icon-s-help' },
       }
     ],
+    hidden: true
   },
 
   {

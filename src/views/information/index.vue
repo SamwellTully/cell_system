@@ -1,12 +1,12 @@
 <template>
   <div class="all" v-loading.fullscreen.lock="fullscreenLoading">
     <div class="tip">
-      <h3 align="center">数据转换提示</h3>
-      文件格式要求单表头，行列无杂乱数据，不支持合并单元格和内部多空行等杂乱数据格式上传；若无法上传，请更改后重新上传。
+      <h3 align="center">数据转换</h3>
+      文件格式要求单表头，行列无杂乱数据，不支持合并单元格和内部多空行等杂乱数据格式上传；要求上传表包含所选表所有字段；且上传表各字段内容满足所选表定义，若无法上传，请更改后重新上传。
     </div>
 <h3></h3>
 <h3>标准上传文件模板示例</h3>
-    <div class="demo-image__placeholder">
+    <div class="demo-image__placeholder" >
       <!-- <div class="block">
         <el-image :src="src" style="width: 1200px; height: 320px"></el-image>
       </div> -->
@@ -130,7 +130,7 @@ export default {
       wFileName: '',
       responseTemp: null,
       uploadExample: [
-        {
+        { //简化信息
           savedGroupName: "中山大学附属肿瘤医院",
           inventoryCode: "221376-2022764",
           sampleType: "白细胞",
@@ -145,36 +145,36 @@ export default {
           hometown: "广东省增城市",
           birthplace: "广东省增城市"
         },
-        {
-          savedGroupName: "中山大学附属肿瘤医院",
-          inventoryCode: "221376-2022764",
-          sampleType: "白细胞",
-          gleanedDate: "采集日期",
-          savedMethod: "-80℃",
-          donatorId: "314827",
-          deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
-          gender: "女",
-          age: "42",
-          sampleCount: "500ul",
-          nation: "汉族",
-          hometown: "广东省增城市",
-          birthplace: "广东省增城市"
-        },
-        {
-          savedGroupName: "中山大学附属肿瘤医院",
-          inventoryCode: "221376-2022764",
-          sampleType: "白细胞",
-          gleanedDate: "采集日期",
-          savedMethod: "-80℃",
-          donatorId: "314827",
-          deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
-          gender: "女",
-          age: "42",
-          sampleCount: "500ul",
-          nation: "汉族",
-          hometown: "广东省增城市",
-          birthplace: "广东省增城市"
-        }
+        // {
+        //   savedGroupName: "中山大学附属肿瘤医院",
+        //   inventoryCode: "221376-2022764",
+        //   sampleType: "白细胞",
+        //   gleanedDate: "采集日期",
+        //   savedMethod: "-80℃",
+        //   donatorId: "314827",
+        //   deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
+        //   gender: "女",
+        //   age: "42",
+        //   sampleCount: "500ul",
+        //   nation: "汉族",
+        //   hometown: "广东省增城市",
+        //   birthplace: "广东省增城市"
+        // },
+        // {
+        //   savedGroupName: "中山大学附属肿瘤医院",
+        //   inventoryCode: "221376-2022764",
+        //   sampleType: "白细胞",
+        //   gleanedDate: "采集日期",
+        //   savedMethod: "-80℃",
+        //   donatorId: "314827",
+        //   deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
+        //   gender: "女",
+        //   age: "42",
+        //   sampleCount: "500ul",
+        //   nation: "汉族",
+        //   hometown: "广东省增城市",
+        //   birthplace: "广东省增城市"
+        // }
       ],
 
       tableName: null,
@@ -362,7 +362,7 @@ export default {
   align-items: center;
 }
 .tip {
-  width: 400px;
+  width: 600px;
   background-color: rgb(242, 241, 241);
   padding: 20px;
   border-radius: 6px;

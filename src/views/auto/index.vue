@@ -1,45 +1,37 @@
 <template>
   <div class="all" v-loading.fullscreen.lock="fullscreenLoading">
-    <div class="tip">
-      <h3 align="center">自动建表上传文件提示</h3>
+    <!-- <div class="tip">
+      <h3 align="center">自动建表</h3>
       文件格式要求单表头，行列无杂乱数据，不支持合并单元格和内部多空行等杂乱数据格式上传；若无法上传，请更改后重新上传。
-    </div>
+    </div> -->
 <h3></h3>
-<h3>标准上传文件模板示例</h3>
+<h3>自动建表文件模板示例</h3>
     <div class="demo-image__placeholder">
       <!-- <div class="block">
         <el-image :src="src" style="width: 1200px; height: 320px"></el-image>
       </div> -->
       <el-table
         :data="uploadExample"
-        style="width: 100%">
-        <el-table-column
-          prop="savedGroupName"
-          label="保存机构名称">
-        </el-table-column>
-        <el-table-column
-          prop="inventoryCode"
-          label="库存清单">
-        </el-table-column>
-        <el-table-column
-          prop="sampleType"
-          label="样本类别">
-        </el-table-column>
+        style="width: 1000px">
         <el-table-column
           prop="gleanedDate"
           label="采集日期">
         </el-table-column>
         <el-table-column
           prop="savedMethod"
-          label="样本类别">
+          label="保存方式">
         </el-table-column>
         <el-table-column
           prop="donatorId"
-          label="捐赠人编号">
+          label="捐献人编号">
         </el-table-column>
         <el-table-column
           prop="deseaseName"
           label="疾病名称">
+        </el-table-column>
+        <el-table-column
+          prop="bodyStatus"
+          label="身体情况">
         </el-table-column>
         <el-table-column
           prop="gender"
@@ -51,7 +43,7 @@
         </el-table-column>
         <el-table-column
           prop="sampleCount"
-          label="样本份数">
+          label="样本数量">
         </el-table-column>
         <el-table-column
           prop="nation"
@@ -67,7 +59,10 @@
         </el-table-column>
       </el-table>
     </div>
-
+    <h3></h3>
+    <div class="tip">
+      文件格式要求单表头，行列无杂乱数据，不支持合并单元格和内部多空行等杂乱数据格式上传；若无法上传，请更改后重新上传。
+    </div>
     <el-upload
       class="upload-demo"
       drag
@@ -101,7 +96,7 @@ export default {
       src: pic,
       fullscreenLoading: false,
       uploadExample: [
-        {
+        { //简化页面内容
           savedGroupName: "中山大学附属肿瘤医院",
           inventoryCode: "221376-2022764",
           sampleType: "白细胞",
@@ -114,38 +109,39 @@ export default {
           sampleCount: "500ul",
           nation: "汉族",
           hometown: "广东省增城市",
-          birthplace: "广东省增城市"
+          birthplace: "广东省增城市",
+          bodyStatus: "健康"
         },
-        {
-          savedGroupName: "中山大学附属肿瘤医院",
-          inventoryCode: "221376-2022764",
-          sampleType: "白细胞",
-          gleanedDate: "采集日期",
-          savedMethod: "-80℃",
-          donatorId: "314827",
-          deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
-          gender: "女",
-          age: "42",
-          sampleCount: "500ul",
-          nation: "汉族",
-          hometown: "广东省增城市",
-          birthplace: "广东省增城市"
-        },
-        {
-          savedGroupName: "中山大学附属肿瘤医院",
-          inventoryCode: "221376-2022764",
-          sampleType: "白细胞",
-          gleanedDate: "采集日期",
-          savedMethod: "-80℃",
-          donatorId: "314827",
-          deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
-          gender: "女",
-          age: "42",
-          sampleCount: "500ul",
-          nation: "汉族",
-          hometown: "广东省增城市",
-          birthplace: "广东省增城市"
-        }
+        // {
+        //   savedGroupName: "中山大学附属肿瘤医院",
+        //   inventoryCode: "221376-2022764",
+        //   sampleType: "白细胞",
+        //   gleanedDate: "采集日期",
+        //   savedMethod: "-80℃",
+        //   donatorId: "314827",
+        //   deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
+        //   gender: "女",
+        //   age: "42",
+        //   sampleCount: "500ul",
+        //   nation: "汉族",
+        //   hometown: "广东省增城市",
+        //   birthplace: "广东省增城市"
+        // },
+        // {
+        //   savedGroupName: "中山大学附属肿瘤医院",
+        //   inventoryCode: "221376-2022764",
+        //   sampleType: "白细胞",
+        //   gleanedDate: "采集日期",
+        //   savedMethod: "-80℃",
+        //   donatorId: "314827",
+        //   deseaseName: "C11.200鼻咽侧壁恶性肿瘤",
+        //   gender: "女",
+        //   age: "42",
+        //   sampleCount: "500ul",
+        //   nation: "汉族",
+        //   hometown: "广东省增城市",
+        //   birthplace: "广东省增城市"
+        // }
       ],
       isAuto: false,
       dataname: "",
@@ -217,8 +213,8 @@ export default {
   align-items: center;
 }
 .tip {
-  width: 400px;
-  background-color: rgb(242, 241, 241);
+  width: 600px;
+  /* background-color: rgb(242, 241, 241); */
   padding: 20px;
   border-radius: 6px;
   margin-top: 20px;
