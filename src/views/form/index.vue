@@ -17,7 +17,7 @@
         <el-input  v-model="form.institutionAddress">
         </el-input>
       </el-form-item>
-      <el-form-item label="邮政编码" prop="institutionPostalCode">
+      <el-form-item label="机构代码" prop="institutionPostalCode">
         <el-input  v-model="form.institutionPostalCode">
         </el-input>
       </el-form-item>

@@ -783,7 +783,7 @@ export default {
                   params: {
                     tab: "second", 
                     //跳转至映射
-              },
+                },
                 });
               }
              },
@@ -1122,30 +1122,35 @@ export default {
             });
         } else {
           //通过showattribute参数对类型进行判断
-          let charOrNum = false; //默认为字符型
-          this.$axios({
-          method: 'post',
-          url: "http://8.134.49.56:8000/G/Showattribute",
-          params: {tableName:this.value}
-          }).then((response) => {
-            for(let i = 0; i < response.data.data.length; i++){
-              //此处是源值检验
-              if(response.data.data[i].Field == row.key){
-                if(!response.data.data[i].Type.includes("char")){
-                  charOrNum = true;
-                }
-              }
-            }
-            this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data_chosen).then((res) => {
+          // let charOrNum = false; //默认为字符型
+          // this.$axios({
+          // method: 'post',
+          // url: "http://8.134.49.56:8000/G/Showattribute",
+          // params: {tableName:this.value}
+          // }).then((response) => {
+          //   for(let i = 0; i < response.data.data.length; i++){
+          //     //此处是源值检验
+          //     if(response.data.data[i].Field == row.key){
+          //       if(!response.data.data[i].Type.includes("char")){
+          //         charOrNum = true;
+          //       }
+          //     }
+          //   }
+          // })
+          //
+          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data_chosen).then((res) => {
             //根据长度限制为目标值添加校验规则
-            if (res.data.data.length !== 0 && !charOrNum) {
+            if(res.data.data["dataType"] == null){
+              res.data.data["dataType"] = "char"
+            }
+            if (res.data.data.length !== 0 && res.data.data["dataType"].includes("char")) {
               let obj = {};
               obj["min"] = res.data.data[0].lengthMin;
               obj["max"] = res.data.data[0].lengthMax;
               obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
               obj["trigger"] = "blur";
               this.rules.key.push(obj);
-            }else if(res.data.data.length !== 0 && charOrNum){
+            }else if(res.data.data.length !== 0 && !res.data.data["dataType"].includes("char")){
               let obj = {};
               obj["validator"] = this.checkNum;
               obj["minValue"] = res.data.data[0].lengthMin;
@@ -1155,8 +1160,6 @@ export default {
               this.rules.key.push(obj);
             }
           });
-          })
-          //
         }
       });
 
@@ -1176,31 +1179,55 @@ export default {
               this.mulSelectionData = res.data.data;
             });
         } else {
-          let charOrNum = false; //默认为字符型
-          this.$axios({
-          method: 'post',
-          url: "http://8.134.49.56:8000/G/Showattribute",
-          params: {tableName:this.value}
-          }).then((response) => {
-            for(let i = 0; i < response.data.data.length; i++){
-              //此处是源值检验
-              if(response.data.data[i].Field == row.value){
-                if(!response.data.data[i].Type.includes("char")){
-                  charOrNum = true;
-                }
-              }
-            }
-            this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
+          // let charOrNum = false; //默认为字符型
+          // this.$axios({
+          // method: 'post',
+          // url: "http://8.134.49.56:8000/G/Showattribute",
+          // params: {tableName:this.value}
+          // }).then((response) => {
+          //   for(let i = 0; i < response.data.data.length; i++){
+          //     //此处是源值检验
+          //     if(response.data.data[i].Field == row.value){
+          //       if(!response.data.data[i].Type.includes("char")){
+          //         charOrNum = true;
+          //       }
+          //     }
+          //   }
+          //   this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
+          //   //根据长度限制为目标值添加校验规则
+          //   //通过showattribute参数对类型进行判断
+          //   if (res.data.data.length !== 0 && charOrNum == false) {
+          //     let obj = {};
+          //     obj["min"] = res.data.data[0].lengthMin;
+          //     obj["max"] = res.data.data[0].lengthMax;
+          //     obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
+          //     obj["trigger"] = "blur";
+          //     this.rules.value.push(obj);
+          //   }else if(res.data.data.length !== 0 && charOrNum == true){
+          //     let obj = {};
+          //     obj["validator"] = this.checkNum;
+          //     obj["minValue"] = res.data.data[0].lengthMin;
+          //     obj["maxValue"] = res.data.data[0].lengthMax;
+          //     obj["message"] = "大小在 " + obj["minValue"] + " 到 " + obj["maxValue"] + "之间";
+          //     obj["trigger"] = "blur";
+          //     this.rules.value.push(obj);
+          //   }
+          // });
+          // })
+          //
+          this.$http.post("http://8.134.49.56:8000/G/NotEnumeData", data).then((res) => {
             //根据长度限制为目标值添加校验规则
-            //通过showattribute参数对类型进行判断
-            if (res.data.data.length !== 0 && charOrNum == false) {
+            if(res.data.data["dataType"] == null){
+              res.data.data["dataType"] = "char"
+            }
+            if (res.data.data.length !== 0 && res.data.data["dataType"].includes("char")) {
               let obj = {};
               obj["min"] = res.data.data[0].lengthMin;
               obj["max"] = res.data.data[0].lengthMax;
               obj["message"] = "长度在 " + obj["min"] + " 到 " + obj["max"] + " 个字符";
               obj["trigger"] = "blur";
               this.rules.value.push(obj);
-            }else if(res.data.data.length !== 0 && charOrNum == true){
+            }else if(res.data.data.length !== 0 && !res.data.data["dataType"].includes("char")){
               let obj = {};
               obj["validator"] = this.checkNum;
               obj["minValue"] = res.data.data[0].lengthMin;
@@ -1210,8 +1237,6 @@ export default {
               this.rules.value.push(obj);
             }
           });
-          })
-          //
         }
       });
 

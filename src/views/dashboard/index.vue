@@ -61,7 +61,9 @@
                 </el-table-column>
 
                 <el-table-column class-name="status-col" label="操作2" width="110" align="center">
-                  <el-button type="danger">删除</el-button>
+                  <template slot-scope="scope">
+                    <el-button type="danger" @click="deleteTable(scope.row.gTalename)">删除</el-button>
+                  </template>
                 </el-table-column>
 
                 <el-table-column class-name="status-col" label="操作3" width="120" align="center">
@@ -113,7 +115,24 @@
             <span slot="label" class="tableTitleClass">映射</span>
             <el-table :data="NewMapItemPri" row-key="id" style="width: 100%"
             @sort-change="changeSortMapPri">
-              <el-table-column label="ID" width="95" align="center" prop="id">
+            <el-table-column type="expand">
+                <template slot-scope="props">
+                  <el-table :data="props.row.info" style="width: 100%" row-key="sourceField" highlight-current-row
+                    :row-style="tableRowClassName" :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
+                    <el-table-column label=" " prop="''" width="60px" align="center">
+                    </el-table-column>
+                    <el-table-column label="源字段" prop="sourceField">
+                    </el-table-column>
+                    <el-table-column label="目标字段" prop="targetField">
+                    </el-table-column>
+                  </el-table>
+                </template>
+              </el-table-column>
+              <!-- <el-table-column label="序号" width="95" align="center" prop="id"> -->
+              <el-table-column label="序号" width="95" align="center" prop="id">
+                <!-- <template slot-scope="scope">
+                  {{scope.$index + (this.MappingprivatePage - 1) * this.p2size}}
+                </template> -->
               </el-table-column>
               <el-table-column label="映射名称" prop="mappingName" align="center">
               </el-table-column>
@@ -209,7 +228,9 @@
                 </el-table-column>
 
                 <el-table-column class-name="status-col" label="操作2" width="110" align="center">
-                  <el-button type="danger">删除</el-button>
+                  <template slot-scope="scope">
+                    <el-button type="danger" @click="deleteTable(scope.row.gTalename)">删除</el-button>
+                  </template>
                 </el-table-column>
 
                 <el-table-column class-name="status-col" label="操作3" width="120" align="center">
@@ -276,7 +297,8 @@
                 </template>
               </el-table-column>
               
-              <el-table-column label="ID" width="95" align="center" prop="id">
+              <el-table-column label="序号" width="95" align="center" prop="id">
+                <!-- {{scope}} -->
               </el-table-column>
               <el-table-column label="映射名称" prop="mappingName" align="center">
               </el-table-column>
@@ -846,6 +868,7 @@ export default {
         let delete_response = await deleteHisMapping(row.id, this.userInfo.userId);
         this.historicalPublicMappingsTemp.splice(index, 1)
         this.getPublicHistoricalMapping();
+        location.reload()
       }
     },
     async handleDeletePrivateMapping(index, row) {
@@ -858,6 +881,29 @@ export default {
     // 更换个人文件的标签页
     handleSwitchTabs(tab, event) {
       console.log(tab, event);
+    },
+    deleteTable(tName){
+      this.$alert("确认删除该表？(与该表相关的映射也会相应删除)","提示",{
+        confirmButtonText:"确定",
+        callback:(action) =>{
+          if(action === "confirm"){
+            this.$axios({
+              method: 'post',
+              url: "http://8.134.49.56:8000/C/delectTable",
+              params: {tableName:tName}
+            }).then((response) => {
+              if(response.data){
+                this.$alert("删除成功","提示",{
+                confirmButtonText:"确定",
+                callback:(action) =>{location.reload()}})
+              }else{
+                this.$alert("删除失败，请稍后再试","提示",{
+                confirmButtonText:"确定",
+                callback:(action) =>{location.reload()}})
+              }
+            })
+          }
+        }})
     },
     // 查看公开文件按钮
     checkPublicTable(tName) {
@@ -876,7 +922,7 @@ export default {
       // })
       this.checkPublicTableVisible = true;
       this.checkLoading = true
-      this.fieldKeys = ["tokenEnume","Field","Type","Null","lengthMin","lengthMax","enumeration"]
+      this.fieldKeys = ["是否为枚举项","列名","数据类型","是否可以为空值","最小长度","最大长度","枚举项"]
       // 获取表格数据
       let params = new URLSearchParams();
       params.append("tableName", tName);
@@ -888,6 +934,19 @@ export default {
         console.log("gridData")
         console.log(response.data.data)
         this.gridData = response.data.data
+        for(let i = 0;i < this.gridData.length;i++){
+          this.gridData[i]["是否为枚举项"] = this.gridData[i]["是否为枚举项"]=="true"?"是":"否";
+          if(this.gridData[i]["数据类型"].includes("char")){
+            this.gridData[i]["数据类型"] = "字符型";
+          }else{
+            this.gridData[i]["数据类型"] = "浮点型";
+          }
+          if(this.gridData[i]["是否可以为空值"].includes("YES")){
+            this.gridData[i]["是否可以为空值"] = "是";
+          }else{
+            this.gridData[i]["是否可以为空值"] = "否";
+          }
+        }
         // for (let i = 0; i < this.gridData.length; i++) {
         //   let tmp;
         //   tmp = this.gridData[i]["导入时间"].slice(0, 10) + " " + this.gridData[i]["导入时间"].slice(11, 19);
@@ -911,7 +970,7 @@ export default {
       //   allKeys = Object.keys(response.data.data[0]) // response.data返回的是个数组，里面只有一个元素，为该表的示范数据（键值对），通过keys()获得所有键
       //   this.fieldKeys = allKeys // 必须在里面赋值
       // })
-      this.fieldKeys = ["tokenEnume","Field","Type","Null","lengthMin","lengthMax","enumeration"]
+      this.fieldKeys = ["是否为枚举项","列名","数据类型","是否可以为空值","最小长度","最大长度","枚举项"]
       // 获取表格数据
       let params = new URLSearchParams();
       params.append("tableName", tName);
@@ -923,6 +982,23 @@ export default {
         console.log("gridData")
         console.log(response.data.data)
         this.gridData = response.data.data
+        for(let i = 0;i < this.gridData.length;i++){
+          this.gridData[i]["是否为枚举项"] = this.gridData[i]["是否为枚举项"]=="true"?"是":"否";
+          if(this.gridData[i]["数据类型"] != null){
+            if(this.gridData[i]["数据类型"].includes("char")){
+              this.gridData[i]["数据类型"] = "字符型";
+            }else{
+              this.gridData[i]["数据类型"] = "浮点型";
+            }
+          }
+          if(this.gridData[i]["是否可以为空值"] != null){
+            if(this.gridData[i]["是否可以为空值"].includes("YES")){
+              this.gridData[i]["是否可以为空值"] = "是";
+            }else{
+              this.gridData[i]["是否可以为空值"] = "否";
+            }
+          }
+        }
         // for (let i = 0; i < this.gridData.length; i++) {
         //   let tmp;
         //   tmp = this.gridData[i]["导入时间"].slice(0, 10) + " " + this.gridData[i]["导入时间"].slice(11, 19);
