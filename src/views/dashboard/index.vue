@@ -129,10 +129,7 @@
                 </template>
               </el-table-column>
               <!-- <el-table-column label="序号" width="95" align="center" prop="id"> -->
-              <el-table-column label="序号" width="95" align="center" prop="id">
-                <!-- <template slot-scope="scope">
-                  {{scope.$index + (this.MappingprivatePage - 1) * this.p2size}}
-                </template> -->
+              <el-table-column label="序号" width="95" align="center" :index="indexPriMethod" type="index">
               </el-table-column>
               <el-table-column label="映射名称" prop="mappingName" align="center">
               </el-table-column>
@@ -297,7 +294,7 @@
                 </template>
               </el-table-column>
               
-              <el-table-column label="序号" width="95" align="center" prop="id">
+              <el-table-column label="序号" width="95" align="center" :index="indexPubMethod" type="index">
                 <!-- {{scope}} -->
               </el-table-column>
               <el-table-column label="映射名称" prop="mappingName" align="center">
@@ -680,6 +677,12 @@ export default {
     }
   },
   methods: {
+    indexPriMethod(index){
+      return index + 1 + (this.MappingprivatePage - 1) * this.p2Size
+    },
+    indexPubMethod(index){
+      return index + 1 + (this.MappingpublicPage - 1) * this.p2Size
+    },
     //时间跨页排序
     changeSortPri(val){
       if(this.privateFiles != null){

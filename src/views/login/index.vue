@@ -87,7 +87,7 @@
           <el-form-item label="通讯地址" :label-width="formLabelWidth">
             <el-input v-model="register.institutionAddress" autocomplete="off" placeholder="请输入通讯地址" />
           </el-form-item>
-          <el-form-item label="邮政编码" :label-width="formLabelWidth">
+          <el-form-item label="机构代码" :label-width="formLabelWidth">
             <el-input v-model="register.institutionPostalCode" autocomplete="off" placeholder="请输入邮政编码" />
           </el-form-item>
           <el-form-item label="联系人姓名" :label-width="formLabelWidth">
@@ -157,6 +157,7 @@ export default {
       }
     }
     return {
+      AddCode:false,
       register: {
         institutionName: '',
         institutionType: '',
@@ -196,6 +197,13 @@ export default {
     }
   },
   watch: {
+    'register.institutionPostalCode':{
+      handler(val){
+    this.AddCode = /(?=.*\d)(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9]).6/.test(val)
+        console.log(this.AddCode)
+
+      }
+    },
     $route: {
       handler: function(route) {
         const query = route.query
@@ -238,7 +246,12 @@ export default {
     registerf() {
       // this.dialogFormVisible = false
       // eslint-disable-next-line eqeqeq
-      if (this.register.userId != '' && this.register.userName != '' && this.register.userPwd != '' && this.register.userMark != '') {
+      if(!this.AddCode){
+        this.$message({
+          message: '机构代码必须由6位数字、字母、特殊字符组合',
+          type: 'warning'
+        })
+      }else if (this.register.userId != '' && this.register.userName != '' && this.register.userPwd != '' && this.register.userMark != '') {
         let params = new URLSearchParams();
         params.append("institutionName", this.register.institutionName);
         params.append("institutionType", this.register.institutionType);

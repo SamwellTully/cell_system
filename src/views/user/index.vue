@@ -177,6 +177,7 @@
           </el-form-item>
           <el-form-item label="机构代码" label-width="100px">
             <el-input v-model="formInlineAdd.institutionPostalCode" autocomplete="off" placeholder="请输入机构代码" />
+            <div v-text="'机构代码仅限六位数字、字符或特殊字符组成'" v-if="!AddCode"></div>
           </el-form-item>
           <el-form-item label="联系人姓名" label-width="100px">
             <el-input v-model="formInlineAdd.userName" autocomplete="off" placeholder="请输入联系人姓名" />
@@ -345,6 +346,7 @@ export default {
       },
       AddPhone:false,
       AddEmail:false,
+      AddCode:false,
       //编辑相关
       eidt:false,//是否编辑操作
       editFormChanged:false,
@@ -538,7 +540,7 @@ export default {
       // console.log('tanchuang')
 
 console.log(this.formInlineAdd)
-      if (this.AddEmail==true&&this.AddPhone==true ) {
+      if (this.AddEmail==true&&this.AddPhone==true&&this.AddCode==true) {
         //&& this.formInlineAdd.userPassword != ''&& this.formInlineAdd.institutionName != ''
       let params = new URLSearchParams()
       
@@ -587,6 +589,7 @@ console.log(this.formInlineAdd)
       }
       this.AddPhone=false
       this.AddEmail=false
+      this.AddCode=false
        this.$router.replace({
                           path: '/userblank',
                           name: 'Userblank'
@@ -605,7 +608,7 @@ console.log(this.formInlineAdd)
               else{
                 this.$message({
                     type: 'info',
-                    message: '电话号码或者邮箱错误'
+                    message: '电话号码、邮箱或机构代码错误'
                 });  
               }
             }
@@ -729,6 +732,12 @@ console.log(this.formInlineAdd)
     this.AddPhone = /((\d{11})|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)/.test(val)
         console.log(this.AddPhone)
 
+      }
+    },
+    'formInlineEdit.institutionPostalCode':{
+      handler(val){
+      this.AddCode = /(?=.*\d)(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9]).6/.test(val)
+        console.log(this.AddCode)
       }
     },
     'formInlineAdd.userEmail':{
