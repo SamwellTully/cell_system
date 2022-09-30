@@ -78,13 +78,68 @@
                 <el-table-column class-name="status-col" label="操作4" width="110" align="center">
 
                   <template slot-scope="scope">
-                    <el-button @click="jumpTrans(scope.row.gTalename)" type="info">映射</el-button>
+                    <el-button @click="jumpTrans(scope.row.gTalename, scope.row.gTableinstitution)" type="info">映射</el-button>
                   </template>
-
-
+          
                 </el-table-column>
 
-                <el-table-column label="操作5" width="110" align="center">
+                <el-table-column class-name="status-col" label="操作5" width="110" align="center">
+
+                  <template slot-scope="scope">
+                    <el-button @click="publicTable(scope.row.id)" type="info">发布</el-button>
+                  </template>
+
+                  <el-dialog width="80%" title="审批进度" :visible.sync="progressVisible" :append-to-body="true">
+                    <div>
+                      <Steps :currentStep="currentStep" :totalSteps="3" :stepsLabel="stepsLabel" :stepsDesc="stepsDesc" :currentStatus="currentState"/>
+                    </div>
+                  </el-dialog>
+                  
+                  <el-dialog width="80%" title="选择公开用户范围" :visible.sync="userChooseVis"
+                    :append-to-body="true">
+                    <div id="example">
+                      <el-input class="markinput" type="text" style="margin-bottom: 15px" v-model="searchUser"
+                        placeholder="请输入用户昵称进行查找"></el-input>
+                    </div>
+                    <el-table
+                      ref="dataTable"
+                      :data="NewChooseUsers"
+                      border
+                      @select="toggleSelection" 
+                      @select-all="toggleSelection"
+                      style="width: 100%;">
+                      <el-table-column
+                          type="selection"
+                          header-align="center"
+                          align="center"
+                          width="100"
+                      >
+                      </el-table-column>
+                      <el-table-column
+                          prop="userName"
+                          header-align="center"
+                          align="center"
+                          label="用户昵称">
+                      </el-table-column>
+                      <el-table-column
+                          prop="userPhoneNum"
+                          header-align="center"
+                          align="center"
+                          label="手机号">
+                      </el-table-column>
+                      <el-table-column
+                          prop="userEmail"
+                          header-align="center"
+                          align="center"
+                          label="联系邮箱">
+                      </el-table-column>
+                    </el-table>
+                    <br/>
+                    <el-button type="primary" @click="sendUserList">选择完毕</el-button>
+                  </el-dialog>
+                </el-table-column>
+
+                <!-- <el-table-column label="操作5" width="110" align="center">
                   <template slot-scope="scope">
                     <el-button type="primary" @click="openForPrivate(scope.row.gTalename)">导出</el-button>
                   </template>
@@ -104,7 +159,7 @@
                         :prop="fieldkey" :label="fieldkey"></el-table-column>
                     </el-table>
                   </el-dialog>
-                </el-table-column>
+                </el-table-column> -->
               </el-table>
               <el-pagination @current-change="handlePrivateCurrentChange" :current-page.sync="privatePage"
                 :page-size="p2Size" layout="total, prev, pager, next, jumper" :total="privateTotal">
@@ -242,11 +297,11 @@
                 <el-table-column class-name="status-col" label="操作4" width="110" align="center">
 
                   <template slot-scope="scope">
-                    <el-button @click="jumpTrans(scope.row.gTalename)" type="info">映射</el-button>
+                    <el-button @click="jumpTrans(scope.row.gTalename, scope.row.gTableinstitution)" type="info">映射</el-button>
                   </template>
 
                 </el-table-column>
-                <el-table-column label="操作5" width="110" align="center">
+                <!-- <el-table-column label="操作5" width="110" align="center">
                   <template slot-scope="scope">
                     <el-button type="primary" @click="openForPublic(scope.row.gTalename)">导出</el-button>
                   </template>
@@ -266,7 +321,7 @@
                         :prop="fieldkey" :label="fieldkey"></el-table-column>
                     </el-table>
                   </el-dialog>
-                </el-table-column>
+                </el-table-column> -->
               </el-table>
               <el-pagination @current-change="handlePubilcCurrentChange" :current-page.sync="publicPage"
                 :page-size="p2Size" layout="total, prev, pager, next, jumper" :total="publicTotal">
@@ -355,7 +410,9 @@ import { deleteHisMapping, getPublicMappings, getPrivateMappings } from '@/api/m
 import Axios from "axios";
 import { create } from 'domain';
 import _ from 'lodash';
+import Steps from '@/components/Steps.vue';
 export default {
+  components: { Steps },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -368,6 +425,16 @@ export default {
   },
   data() {
     return {
+      chooseTableId:'',
+      userChooseVis:false,
+      searchUser:'',
+      userList:[],
+      chooseUserList:[],
+      stepsLabel: ["用户"],
+      stepsDesc: ["申请已提交"],
+      currentState: 2,
+      progressVisible: false,
+      currentStep:1,
       checkMappingVisible: false,
       selectedMapping: [],
       historicalPublicMappings: [],
@@ -575,6 +642,21 @@ export default {
     }
   },
   computed: {
+    NewChooseUsers(){
+      var _this = this;
+      var NewChooseUsers = [];
+      if (this.userList != null && this.userList != false) {
+        _this.userList.map(function (item) {
+          if (
+            // item.id.search(_this.searchData) != -1 ||
+            item.userName.search(_this.searchUser) != -1
+          ) {
+            NewChooseUsers.push(item);
+          }
+        });
+      }
+      return NewChooseUsers;
+    },
     NewPriitems() {
       var _this = this;
       var NewPriitems = [];
@@ -677,6 +759,100 @@ export default {
     }
   },
   methods: {
+    toggleSelection(val){
+      this.chooseUserList = []
+      for (var i = 0; i < val.length; i++) {
+          this.chooseUserList.push(val[i].userId)
+      }
+    },
+    sendUserList(){
+      this.$axios({
+        method: 'post',
+        url: "http://8.134.49.56:8000/requestPublish/userRequest",
+        params: {tableId:this.chooseTableId, token: getToken()},
+        data: this.chooseUserList,
+      }).then((response) => {
+        if(response.data){
+          this.$alert("文件发布申请已提交","提示",{
+          confirmButtonText:"确定",
+          callback:(action) =>{this.userChooseVis = false;}})
+        }else{
+          this.$alert("文件发布申请提交失败","提示",{
+          confirmButtonText:"确定",
+          callback:(action) =>{this.userChooseVis = false;}})
+        }
+      })
+    },
+    async publicTable(id){
+      this.chooseTableId = id;
+      var flag = true;
+      await Axios.get(`http://8.134.49.56:8000/requestPublish/getRequestList?token=${getToken()}`).then(
+        res => {
+          for(let i = 0;i < res.data.data.length; i++){
+            if(res.data.data[i].tableId == id){
+              flag = false;
+              //简化代码编写
+              this.currentStep = 1;
+              this.currentState = 2;
+              this.stepsDesc = ["申请已提交"]
+              this.stepsLabel = ["用户"]
+              this.currentStep += res.data.data[i].hospitalAdminState !== 0 ? 1 : 0
+              this.currentStep += res.data.data[i].adminState !== 0 ? 1 : 0
+              if(res.data.data[i].hospitalAdminState == 1 || res.data.data[i].adminState == 1){
+                this.currentState = 1;
+              }
+              this.stepsLabel.push("医院管理员id：" + res.data.data[i].hospitalAdminId )
+              this.stepsLabel.push("超级管理员")
+              this.stepsDesc.push("医院管理员意见：" + res.data.data[i].hospitalAdminInfo)
+              this.stepsDesc.push("超级管理员意见：" + res.data.data[i].adminInfo)
+              this.progressVisible = true
+              break;
+            }
+          }
+        }
+      )
+      if(flag){
+        var r = confirm("是否发布");
+        if (r == true) {
+          this.userChooseVis = true;
+          // this.$axios({
+          //   method: 'post',
+          //   url: "http://8.134.49.56:8000/requestPublish/userRequest",
+          //   params: {tableId:id, token: getToken()}
+          // }).then((response) => {
+          //   if(response.data){
+          //     this.$alert("文件发布申请已提交","提示",{
+          //     confirmButtonText:"确定",
+          //     callback:(action) =>{location.reload()}})
+          //   }else{
+          //     this.$alert("文件发布申请提交失败","提示",{
+          //     confirmButtonText:"确定",
+          //     callback:(action) =>{location.reload()}})
+          //   }
+          // })
+          this.$axios({
+            methods: 'get',
+            url: "http://8.134.49.56:8000/requestPublish/getUserClassify"
+          }).then((response) => {
+            if(response.data.code == 200){
+              //按接口返回状态进行处理
+              this.userList = [];
+              for(var key in response.data.data){
+                if(key == this.userInfo.institutionName){
+                  for(let j = 0;j<response.data.data[key].length;j++){
+                    this.userList.push(response.data.data[key][j])
+                  }
+                }
+              }
+            }else{
+              this.$alert("获取用户列表失败，请联系管理员","提示",{
+                confirmButtonText:"确定",
+                callback:(action) =>{location.reload()}})
+              }
+            })
+        }
+      }
+    },
     indexPriMethod(index){
       return index + 1 + (this.MappingprivatePage - 1) * this.p2Size
     },
@@ -879,6 +1055,7 @@ export default {
       if (r == true) {
         let delete_response = await deleteHisMapping(row.id, this.userInfo.userId);
         this.getPrivateHistoricalMapping();
+        location.reload()
       }
     },
     // 更换个人文件的标签页
@@ -1071,12 +1248,13 @@ export default {
         },
       });
     },
-    jumpTrans(val) {
+    jumpTrans(tableName,institution) {
       // this.$router.push('/example/publish', 1)
       this.$router.push({
         name: "Mapping",
         params: {
-          tableName: val,
+          tableName: tableName,
+          institution: institution,
         },
       });
     },
@@ -1236,5 +1414,12 @@ export default {
   border-style: solid;
   border-width: medium;
   border-color: #9cdcfe;
+}
+.el-table__header .el-table-column--selection .cell .el-checkbox:after {
+  color: grey;
+  content: "全选";
+  font-size: 16px;
+  margin-left: 12px;
+  font-weight: bold;
 }
 </style>

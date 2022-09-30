@@ -48,7 +48,14 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-row style="margin-bottom:30px;">
+      <el-form-item class="role-select">
+        <el-select v-model="loginForm.role" placeholder="选择登录角色" >
+          <el-option v-for="item in role" :key="item" :label="item" :value="item" >
+          </el-option>
+        </el-select>
+      </el-form-item>
+
+      <el-row style="margin-bottom:30px;" >
         <el-button :loading="loading" style="width: 30%" type="primary"  @click.native.prevent="handleLogin">
           登录
         </el-button>
@@ -172,6 +179,7 @@ export default {
         belongHos:'',
       },
       hospitals:[],
+      role:["普通用户","医院管理员","超级管理员"],
       disabled:false,
       time:0,
       btntxt:"重新发送",
@@ -493,6 +501,10 @@ $light_gray:#eee;
     overflow: hidden;
   }
 
+  .role-select{
+    text-align: center;
+  }
+
   .tips {
     font-size: 14px;
     color: #fff;
@@ -547,7 +559,6 @@ $light_gray:#eee;
   .thirdparty-button {
     position: absolute;
     right: 0;
-    bottom: 6px;
   }
 
   @media only screen and (max-width: 470px) {

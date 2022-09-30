@@ -100,13 +100,14 @@
         </div>
       </el-col> -->
 
-      
+      <!-- :header-cell-style="{background:'#000',color:'#fff',height:'40px',lineHeight:'40px',padding:0}"  表头样式修改  -->
 
       <el-col :span="9">
         <div class="grid-content">
           <template>
             <el-table ref="t2" :data="table2" border highlight-current-row @current-change="handleCurrentChange2"
-              @row-click="rowclick2" style="width: 100%" height="230">
+              @row-click="rowclick2" style="width: 100%" height="230"
+              :header-cell-style="{color:'#000'}"   >
               <el-table-column fixed prop="key" label="目标字段">
                 <template slot-scope="scope">
                   <el-tag :type="scope.row.flag === 1 ? 'info' : ''" disable-transitions>{{ scope.row.key }}</el-tag>
@@ -177,7 +178,7 @@
           <template>
             <h3>已关联字段</h3>
             <el-table :data="table3" border style="width: 100%" :row-key="getRowKeys" :expand-row-keys="expands"
-              @expand-change="expandSelect">
+              @expand-change="expandSelect" :header-cell-style="{color:'#000'}">
               <el-table-column prop="key" label="源字段"> </el-table-column>
               <el-table-column prop="value" label="目的字段"> </el-table-column>
               <!-- <el-table-column label="操作">
@@ -262,19 +263,19 @@
         <div class="grid-content">
           <template>
             <h3>内容替换</h3>
-            <el-table :data="replaceField" border style="width: 100%">
-              <el-table-column fixed prop="originalField" label="源字段">
+            <el-table :data="replaceField" border style="width: 100%" :header-cell-style="{color:'#000'}">
+              <el-table-column  prop="originalField" label="源字段">
               </el-table-column>
-              <el-table-column fixed prop="originalValue" label="源值"> </el-table-column>
+              <el-table-column  prop="originalValue" label="源值"> </el-table-column>
               <el-table-column prop="targetValue" label="目标值"> </el-table-column>
-              <el-table-column fixed="right" label="操作">
+              <!-- <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
                   <el-button @click.native.prevent="deleteRow2(scope.row)" size="mini" style="margin-left: 10px"
                     type="danger">
                     移除
                   </el-button>
                 </template>
-              </el-table-column>
+              </el-table-column> -->
             </el-table>
           </template>
         </div>
@@ -1098,6 +1099,7 @@ export default {
 
       let data = new FormData();
       data.append("file", this.file);
+      data.append("tableName",this.value)
       data.append("relationString", JSON.stringify(obj1));
       data.append("hashString", JSON.stringify(obj2));
 

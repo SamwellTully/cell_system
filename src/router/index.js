@@ -155,6 +155,43 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/hosAuthority',
+    component: Layout,
+    children: [
+      {
+        path: 'information',
+        name: 'HosAuthority',
+        component: () => import('@/views/authority/index_hosAdmin'),
+        meta: { title: '医院管理员权限管理', icon: 'el-icon-s-management' }
+      }
+    ]
+  },
+  {
+    path: '/userAuthority',
+    component: Layout,
+    children: [
+      {
+        path: 'information',
+        name: 'UserAuthority',
+        component: () => import('@/views/authority/index_user'),
+        meta: { title: '用户权限管理', icon: 'el-icon-s-management' }
+      }
+    ],
+    hidden: true
+  },
+  {
+    path: '/adminAuthority',
+    component: Layout,
+    children: [
+      {
+        path: 'information',
+        name: 'AdminAuthority',
+        component: () => import('@/views/authority/index_admin'),
+        meta: { title: '超级管理员权限管理', icon: 'el-icon-s-management' }
+      }
+    ]
+  },
+  {
     path: '/userblank',
     component: Layout,
     children: [
@@ -162,6 +199,17 @@ export const constantRoutes = [
         path: 'information',
         name: 'Userblank',
         component: () => import('@/views/user/blank'),
+      }
+    ]
+  },
+  {
+    path: '/authblank',
+    component: Layout,
+    children: [
+      {
+        path: 'information',
+        name: 'Authblank',
+        component: () => import('@/views/authority/blank'),
       }
     ]
   },

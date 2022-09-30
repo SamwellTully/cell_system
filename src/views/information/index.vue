@@ -68,12 +68,12 @@
       </el-table>
     </div>
 
-    <el-dialog class="input-container" title="请输入错误文件名称" :visible.sync="wFileNameVisable" :center="true">
+    <!-- <el-dialog class="input-container" title="请输入错误文件名称" :visible.sync="wFileNameVisable" :center="true">
       <el-input v-model="wFileName"></el-input>
       <el-row>  </el-row>
       <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
 
-        <!-- 作空格用 -->
+        
         <el-col :span="6">
           <div class="grid-content"></div> 
         </el-col>
@@ -90,7 +90,7 @@
 
       </el-row>
       
-    </el-dialog>
+    </el-dialog> -->
 
     <el-upload
       class="upload-demo"
@@ -212,8 +212,15 @@ export default {
           wrongList += (this.responseTemp.data.data.wrongInfList[i] + '\n'); //添加换行符
         }
         //var data = JSON.stringify(response.data.data.wrongInfList);
+        let yy = new Date().getFullYear();
+        let mm = new Date().getMonth()+1;
+        let dd = new Date().getDate();
+        let hh = new Date().getHours();
+        let mf = new Date().getMinutes()<10 ? '0'+new Date().getMinutes() : new Date().getMinutes();
+        let ss = new Date().getSeconds()<10 ? '0'+new Date().getSeconds() : new Date().getSeconds();
+        let fileName = yy+'/'+mm+'/'+dd+' '+hh+':'+mf+':'+ss;
         let str = new Blob([wrongList] , {type : 'text/plain;charset=utf-8'});
-        saveAs(str,this.wFileName + '.txt');
+        saveAs(str,"错误信息:" + fileName + '.txt');
         this.wFileName = '';
         this.wFileNameVisable = false;
     },
@@ -290,12 +297,14 @@ export default {
             }else if(response.data.data.wrongInfList.length != 0){
                   checkFlag = false;
                   this.fullscreenLoading = false;
-                  this.$alert("上传文件内容有误，请重新上传", "提示", {
-                  confirmButtonText: "确定",
+                  this.$confirm("上传文件内容有误，确认下载错误细节文件？", "提示", {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
                   callback: (action) => {
                     if (action === "confirm") {
                       this.responseTemp = response;
-                      this.wFileNameVisable = true;
+                      // this.wFileNameVisable = true;
+                      this.savewFileName();
                     //   this.$router.push({
                     //   name: "Example",
                     //   params: {

@@ -97,6 +97,29 @@
     </el-row>
 
     <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
+      <el-col :span="2">
+        <div class="grid-content" ></div>
+      </el-col>
+
+      <el-col :span="9" >
+        <div class="grid-content">
+          <h3>所属单位：{{this.originFileIns}}</h3>
+        </div>
+      </el-col>
+
+      <el-col :span="6">
+        <div class="grid-content">
+          <h3>所属单位：{{this.targetFileIns}}</h3>
+        </div>
+      </el-col>
+
+      <el-col :span="6">
+        <div class="grid-content">
+        </div>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20" style="display: flex; align-items: center" type="flex" justify="center">
       <el-col :span="9">
         <div class="grid-content">
           <template>
@@ -127,7 +150,7 @@
                   <el-tag :type="scope.row.flag === 1 ? 'info' : ''" disable-transitions>{{ scope.row.key }}</el-tag>
                 </template>
               </el-table-column>
-              <el-table-column fixed prop="value" label="字段描述">
+              <el-table-column  prop="value" label="实例数据">
               </el-table-column>
             </el-table>
           </template>
@@ -281,7 +304,7 @@
 
       <el-col :span="6">
         <div class="grid-content">
-          <el-button @click="saveMappingsInput()" type="primary" style="width: 100%">保存映射</el-button>
+          <el-button @click="saveMappings()" type="primary" style="width: 100%">保存映射</el-button>
         </div>
       </el-col>
       <el-col :span="6">
@@ -413,6 +436,9 @@ export default {
         }, 100);
       };
     return {
+      originFileIns:"",
+      targetFileIns:"",
+      fileInsDic:{},
       checkNum,
       inputText:"",
       chosenTable:" ",
@@ -425,6 +451,8 @@ export default {
       showHistoricalMapping: false,
       showHistoricalMappingDetails: false,
       selectedHistoricalMappingDate: {},
+      sourceBelong:'',
+      targetBelong:'',
 
       options: [], //目标字段组多选框数据（表名集合）
       // newoptions: [], //用于目标表的搜索
@@ -763,7 +791,14 @@ export default {
       
       console.log(JSON.stringify(replace_infos))
 
-
+      let paraMap = new FormData();
+      paraMap.append("sourcefile",this.chosenTable)
+      paraMap.append("targetfile",this.value)
+      await this.$http
+        .post("http://8.134.49.56:8000/mappings/getMappingName", paraMap)
+        .then((res) => {
+          this.mappingName = res.data.data
+        });
       let data = new FormData();
       data.append("UserId", this.userInfo.userId);
       data.append("sourcefile ", this.chosenTable);
@@ -938,6 +973,7 @@ export default {
       setTimeout(() => {
         x = this.getData(this.value);
       }, 300);
+      this.targetFileIns = this.fileInsDic[this.value]
       setTimeout(() => {
         let delete_time_and_operator = []
         for (var i = 0; i < x.length; i++) {
@@ -1366,9 +1402,14 @@ export default {
         this.database = [];
         for (var i = 0; i < res.data.length; i++) {
           let obj = {};
-          obj.value = res.data[i]["Generaltable_name"];
-          obj.label = res.data[i]["Generaltable_name"];
+          obj.value = res.data[i]["GeneralTable_name"];
+          obj.label = res.data[i]["GeneralTable_name"];
           this.database.push(obj);
+          if(res.data[i]["GeneralTable_name"] == this.chosenTable){
+            this.originFileIns = res.data[i]["GeneralTable_institution"]
+            console.log(this.originFileIns)
+          }
+          this.fileInsDic[res.data[i]["GeneralTable_name"]] = res.data[i]["GeneralTable_institution"]
         }
         this.options = this.database;
       });

@@ -19,58 +19,60 @@
     </div>
 
     <div v-show="active == 2">
-      <el-form ref="tableForm" :rules="tableFormRules" :label-position="labelPosition" label-width="100px"
+      <el-dialog width="80%" title="详情" :visible.sync="addType" :append-to-body="true">
+        <el-form ref="tableForm" :rules="tableFormRules" :label-position="labelPosition" label-width="100px"
         class="demo-dynamic" :model="tableForm">
-        <el-form-item label="列类型:" :required="true">
-          <el-select @change="clearInput" v-model="tableForm.fieldType" placeholder="数据列类型">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="列名:" prop="attributename" :rules="[{ required: true, message: '列名不能为空' }]">
-          <el-input v-model="tableForm.attributename" placeholder="请输入列名"></el-input>
-        </el-form-item>
-        <el-form-item prop="minLength" v-if="tableForm.fieldType == 'char'" label="最小长度:">
-          <el-input v-model="tableForm.minLength" placeholder="请输入该列内容最小长度"></el-input>
-        </el-form-item>
-        <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'char'" label="最大长度:">
-          <el-input v-model="tableForm.maxLength" placeholder="请输入该列内容最大长度"></el-input>
-        </el-form-item>
-        <el-form-item prop="minLength" v-if="tableForm.fieldType == 'float'" label="最小值:">
-          <el-input v-model="tableForm.minLength" placeholder="请输入该列内容最小值"></el-input>
-        </el-form-item>
-        <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'float'" label="最大值:">
-          <el-input v-model="tableForm.maxLength" placeholder="请输入该列内容最大值"></el-input>
-        </el-form-item>
-        <div style="" v-if="tableForm.fieldType == 'enum'">
-          <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" v-for="(v, index) in tableForm.enumeration"
-            :key="v.key" :prop="'enumeration.' + index + '.value'" :label="'枚举项' + (index + 1) + ':'">
-            <el-col :span="12">
-              <el-input v-model="v.value" placeholder="请输入枚举项内容"></el-input>
-            </el-col>
-            <el-col :span="1"></el-col>
-            <el-col :span="2">
-              <el-button @click.prevent="removeEnum(v)">删除</el-button>
-            </el-col>
+          <el-form-item label="列类型:" :required="true">
+            <el-select @change="clearInput" v-model="tableForm.fieldType" placeholder="数据列类型">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
           </el-form-item>
-          <el-form-item>
-            <el-button @click="addEnum">新增枚举项</el-button>
+          <el-form-item label="列名:" prop="attributename" :rules="[{ required: true, message: '列名不能为空' }]">
+            <el-input v-model="tableForm.attributename" placeholder="请输入列名"></el-input>
           </el-form-item>
-        </div>
+          <el-form-item prop="minLength" v-if="tableForm.fieldType == 'char'" label="最小长度:">
+            <el-input v-model="tableForm.minLength" placeholder="请输入该列内容最小长度"></el-input>
+          </el-form-item>
+          <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'char'" label="最大长度:">
+            <el-input v-model="tableForm.maxLength" placeholder="请输入该列内容最大长度"></el-input>
+          </el-form-item>
+          <el-form-item prop="minLength" v-if="tableForm.fieldType == 'float'" label="最小值:">
+            <el-input v-model="tableForm.minLength" placeholder="请输入该列内容最小值"></el-input>
+          </el-form-item>
+          <el-form-item prop="maxLength" v-if="tableForm.fieldType == 'float'" label="最大值:">
+            <el-input v-model="tableForm.maxLength" placeholder="请输入该列内容最大值"></el-input>
+          </el-form-item>
+          <div style="" v-if="tableForm.fieldType == 'enum'">
+            <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" v-for="(v, index) in tableForm.enumeration"
+              :key="v.key" :prop="'enumeration.' + index + '.value'" :label="'枚举项' + (index + 1) + ':'">
+              <el-col :span="12">
+                <el-input v-model="v.value" placeholder="请输入枚举项内容"></el-input>
+              </el-col>
+              <el-col :span="1"></el-col>
+              <el-col :span="2">
+                <el-button @click.prevent="removeEnum(v)">删除</el-button>
+              </el-col>
+            </el-form-item>
+            <el-form-item>
+              <el-button @click="addEnum">新增枚举项</el-button>
+            </el-form-item>
+          </div>
 
-        <el-form-item :required="true" label="是否可为空:">
-          <el-select v-model="tableForm.isNotNull" placeholder="请选择">
-            <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item :rules="[{ required: true, message: '示范数据不能为空' }]" label="示范数据:">
-          <el-input v-model="tableForm.sample" placeholder="请输入该列示范数据"></el-input>
-        </el-form-item>
-      </el-form>
+          <el-form-item :required="true" label="是否可为空:">
+            <el-select v-model="tableForm.isNotNull" placeholder="请选择">
+              <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item :rules="[{ required: true, message: '示范数据不能为空' }]" label="示范数据:">
+            <el-input v-model="tableForm.sample" placeholder="请输入该列示范数据"></el-input>
+          </el-form-item>
+        </el-form>
 
-      <el-button type="primary" style="width: 200px; margin-top: 30px; margin-left: 40% ;" @click="addInput">
-        添加</el-button>
+        <el-button type="primary" style="width: 200px; margin-top: 30px; margin-left: 40% ;" @click="addInput">
+          添加</el-button>
+      </el-dialog>
       <div style="margin-top: 30px">
         <el-row>
           <el-tag type="success">文件名称：{{ tableHeader.dataname }}</el-tag>
@@ -81,7 +83,7 @@
       </div>
 
 
-      <div class="secend-block">
+      <div class="secend-block" style="margin-top: 30px">
         <el-table :data="showLimits">
           <el-table-column prop="fieldType" label="类型">
           </el-table-column>
@@ -121,7 +123,7 @@
         </el-row>
       </div>
 
-      <div class="secend-block">
+      <div class="secend-block" style="margin-top: 30px">
         <el-table :data="showLimits">
           <el-table-column prop="fieldType" label="类型">
           </el-table-column>
@@ -157,6 +159,8 @@
       </el-button>
     </div>
 
+    <el-button icon="el-icon-plus" type="success" @click="addType = true" v-if="active == 2" style="margin-top: 12px;margin-bottom: 20px;margin-left: 20px;">添加数据</el-button>
+    <br/>
     <el-button type="danger" v-if="active > 1" style="margin-top: 12px;margin-bottom: 20px;margin-left: 20px;"
       @click="before">上一步</el-button>
     <el-button type="primary" v-if="active < 3 && active > 1" style="margin-top: 12px;margin-bottom: 20px;"
@@ -191,7 +195,9 @@
         </el-form-item>
         <div style="" v-if="editForm.fieldType == 'enum' && keys.includes(editForm.attributename)">
           <el-form-item :rules="[{ required: true, message: '枚举项不能为空' }]" label="枚举项:">
-            <el-select v-model="enumerationForSelect" multiple collapse-tags style="" placeholder="请选择枚举项">
+            <el-select v-model="enumerationForSelect" multiple collapse-tags style="" placeholder="请选择枚举项" @change="changeSelect"
+            @remove-tag="removeTag">
+              <el-option label="全选" value="全选" style="color:red"></el-option>
               <el-option v-for="item in editForm.SampleArray" :key="item" :label="item" :value="item">
               </el-option>
             </el-select>
@@ -337,6 +343,7 @@ export default {
       }, 500);
     };
     return {
+      addType:false,
       selectedRowIndexForSelect: -1,
       enumerationForSelect: [],
       keys: [],
@@ -463,6 +470,41 @@ export default {
 
   },
   methods: {
+    // 多选模式下移除tag时触发,val为移除的tag值
+    removeTag(val) {
+      if (val === "全选") {
+        this.enumerationForSelect = [];
+      }
+    },
+    changeSelect(val) {
+      var end = val[val.length - 1];
+      if (!val.includes("全选") && val.length === this.editForm.SampleArray.length) {
+        val.unshift("全选");
+      } else if (val.includes("全选") && val.length == 1) {
+        this.editForm.SampleArray.map(item => {
+          val.push(item);
+        });
+      } else if (
+        val.includes("全选") &&
+        val.length - 1 < this.editForm.SampleArray.length &&
+        end == "全选"
+      ) {
+        val = [];
+        this.editForm.SampleArray.map(item => {
+          val.push(item);
+        });
+        val.unshift("全选");
+        // this.value = val;
+      } else if (val.includes("全选") && val.length - 1 < this.editForm.SampleArray.length) {
+        val = val.filter(item => {
+          return item !== "全选";
+        });
+        // this.value = val;
+      }
+      // 注意，加上  this.value = val，确保勾选值同步
+      this.enumerationForSelect = val;
+    },
+
     //设置文件示例值（总体） --> 自动建表使用
     getSampleSet() {
       this.sampleSet = {}
@@ -631,7 +673,9 @@ export default {
         } else {
           let enums = []
           this.editForm.enumeration.forEach((value, index) => {
-            enums.push(value['value'])
+            if(value['value'] != "全选"){
+              enums.push(value['value'])
+            }
           })
           this.showLimits[this.selectedRowIndex]["limit"] = enums.join('\n')
         }
@@ -1057,6 +1101,7 @@ export default {
           this.samples.push(entity_sample)
         }
 
+        this.addType = false
         this.clearInput()
         this.tableForm.fieldType = "char"
       })
